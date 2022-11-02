@@ -1,0 +1,10 @@
+var frameString = "Frame ID: " + frame.id  + "<br />"
+                + "Timestamp: " + frame.timestamp + " &micro;s<br />"
+                + "Hands: " + frame.hands.length + "<br />"
+                + "Fingers: " + frame.fingers.length + "<br />";
+
+var controllerOptions = {};
+
+Leap.loop(controllerOptions, function(frame) {
+  // fetches motion data from sensor
+})
