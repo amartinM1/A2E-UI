@@ -3,27 +3,15 @@ import {
     Text,
     View,
     StyleSheet,
-    TouchableOpacity,
 } from 'react-native';
 
-function Button({onPress, children}) {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.button}>
-                <Text style={styles.button_text}>{children}</Text>
-        </TouchableOpacity>
-    );
-}
-
-function Launch({navigation}) {
+function Home({navigation}) {
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
-                <Text style={styles.title}>Welcome to{"\n"}ASL-to-English</Text>
-                <Text style={styles.body}>We translate your ASL to English all in one application.</Text>
-                <Button onPress={() => navigation.navigate('Home Page') }>Get Started</Button>
             </View>
         </View>
     );
@@ -68,20 +56,6 @@ const styles = StyleSheet.create({
         marginBottom: 80,
         textAlign: 'center',
     },
-    button: {
-        alignItems: 'center',
-        backgroundColor: '#04a4f4',
-        padding: 10,
-        borderRadius: 50,
-        width: 250,
-    },
-    button_text: {
-        marginBottom: 2,
-        marginTop: 2,
-        fontSize: 25,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
 })
 
-export default Launch;
+export default Home;
