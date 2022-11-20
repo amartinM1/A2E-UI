@@ -14,21 +14,19 @@ function Button({onPress, children}) {
     );
 }
 
-class Launch extends Component {
-    render() {
-        return (
-            <View style={styles.container}>
-                <View style={styles.background_container}>
-                    <Text style={styles.logo}>A2E</Text>
-                </View>
-                <View style={styles.main_container}>
-                    <Text style={styles.title}>Welcome to{"\n"}ASL-to-English</Text>
-                    <Text style={styles.body}>We translate your ASL to English all in one application.</Text>
-                    <Button>Get Started</Button>
-                </View>
+function Launch({navigation}) {
+    return (
+        <View style={styles.container}>
+            <View style={styles.background_container}>
+                <Text style={styles.logo}>A2E</Text>
             </View>
-        );
-    }
+            <View style={styles.main_container}>
+                <Text style={styles.title}>Welcome to{"\n"}ASL-to-English</Text>
+                <Text style={styles.body}>We translate your ASL to English all in one application.</Text>
+                <Button onPress={() => navigation.navigate('Launch Example') }>Get Started</Button>
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
