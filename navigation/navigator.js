@@ -20,8 +20,9 @@ function Navigator() {
                     options={{headerShown: false}}
                 />
                 <LaunchStack.Screen 
-                    name="Home Page"
+                    name="Home"
                     component={Home}
+                    options={{headerShown: false}}
                 />
             </LaunchStack.Navigator>
         </NavigationContainer>
