@@ -40,7 +40,7 @@ function Home({navigation}) {
             <View style={styles.top_container}>
                 <Text style={styles.logo}>A2E</Text>
                 <Profile onPress={() => navigation.navigate('Launch') }>Profile</Profile>
-                <Settings onPress={() => navigation.navigate('Launch') }>Settings</Settings>
+                <Settings onPress={() => navigation.navigate('Settings') }>Settings</Settings>
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
