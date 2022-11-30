@@ -23,7 +23,7 @@ function Launch({navigation}) {
             <View style={styles.main_container}>
                 <Text style={styles.title}>Welcome to{"\n"}ASL-to-English</Text>
                 <Text style={styles.body}>We translate your ASL to English all in one application.</Text>
-                <Button onPress={() => navigation.navigate('Launch Example') }>Get Started</Button>
+                <Button onPress={() => navigation.navigate('Home') }>Get Started</Button>
             </View>
         </View>
     );
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
+        backgroundColor: '#F5F5F5',
     },
     main_container: {
         flex: 1,
@@ -51,8 +52,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#04a4f4',
         textAlign: 'left',
-        marginLeft: 15,
-        marginTop: 5,
+        marginLeft: '1%',
+        marginTop: '0.5%',
     },
     title: {
         fontSize: 45,

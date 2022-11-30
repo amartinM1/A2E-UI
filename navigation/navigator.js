@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 //pages
 import Launch from '../pages/launch';
+import Home from '../pages/home';
 
 //stacks
 const LaunchStack = createNativeStackNavigator();
@@ -19,8 +20,9 @@ function Navigator() {
                     options={{headerShown: false}}
                 />
                 <LaunchStack.Screen 
-                    name="Launch Example"
-                    component={Launch}
+                    name="Home"
+                    component={Home}
+                    options={{headerShown: false}}
                 />
             </LaunchStack.Navigator>
         </NavigationContainer>
