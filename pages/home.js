@@ -5,6 +5,7 @@ import {
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
+import Camera from 'react-native-camera';
 
 function Profile({onPress, children}) {
     return (
@@ -30,8 +31,21 @@ function CameraButton({onPress, children}) {
     );
 }
 
-function StartCamera() {
+function detection() {
+    //var sock = new WebSocket("ws://localhost:5001");
+    var sock = new WebSocket("ws://10.0.2.15:3000");  //replace this address with the one the node.js server prints out. keep port 3000
+    <CameraButton>Detecting Camera</CameraButton>
+    sock.onopen = function(){
+        //alert("Socket connected succesfully!!!")
+        setTimeout(() => {sock.send('connection succeeded');},1000);
+    };
+    sock.onmessage=function(onPress){
+        console.log(onPress);//show received from server data in console of browser
+    }
+}
 
+function StartCamera() {
+   
 }
 
 function Home({navigation}) {
@@ -45,7 +59,7 @@ function Home({navigation}) {
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Text style={styles.body}>Left</Text>
-                    <CameraButton onPress={() => StartCamera()}>Start Camera</CameraButton>
+                    <CameraButton onPress={() => StartCamera()}>Connect Camera</CameraButton>
                 </View>
                 <View style={styles.verticle_line}></View>
                 <View style={styles.right_screen}>
@@ -79,7 +93,7 @@ const styles = StyleSheet.create({
         color: '#04a4f4',
         textAlign: 'left',
         width: '50%',
-        marginLeft: '1%',
+        marginLeft: '5%',
     },
     profile_text: {
         fontSize: 23,
@@ -96,10 +110,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     profile: {
-        marginLeft: '30%',
+        alignSelf: 'flex-end',
+        marginBottom: '1%',
+        marginLeft: '5%',
     },
     settings: {
-        marginLeft: '3%',
+        alignSelf: 'flex-end',
+        marginBottom: '1%',
+        marginLeft: '5%',
     },
     main_container: {
         width: '100%',

@@ -9,13 +9,6 @@ import {
 
 function Home({onPress, children}) {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.profile}>
-            <Text style={styles.profile_text}>{children}</Text>
-        </TouchableOpacity>
-    )
-}
-function Detect({onPress, children}) {
-    return (
         <TouchableOpacity onPress={onPress} style={styles.button}>
             <Text style={styles.button_text}>{children}</Text>
         </TouchableOpacity>
@@ -24,35 +17,16 @@ function Detect({onPress, children}) {
 
 
 
-
-//var display = document.getElementById('Detect');
-function detection({onPress, display}) {
-    //var sock = new WebSocket("ws://localhost:5001");
-    var sock = new WebSocket("ws://10.0.2.15:3000");  //replace this address with the one the node.js server prints out. keep port 3000
-    var display=document.getElementById("Detect");
-    
-    sock.onopen = (onPress) =>{
-        //alert("Socket connected succesfully!!!")
-        setTimeout(() => {sock.send('connection succeeded');},1000);
-        display.innerHTML+="connection succeeded <br />";
-    };
-    sock.onmessage=function(onPress){
-        console.log(onPress);//show received from server data in console of browser
-        display.innerHTML+=onPress.data+"<br />"; //add incoming message from server to the log screen previous string + new string(message)
-    }
-}
-
 function Connect({navigation}) {
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
-                <Text style={styles.logo}>Settings</Text>
+                <Text style={styles.title}>Settings</Text>
             </View>
             <View style={styles.main_container}>
                 <Text style={styles.title}></Text>
                 <Text style={styles.body}></Text>
-                <Home onPress={()=> navigation.navigate('Launch')}>Return Home</Home>
-                <Detect onPress={() => detection() }>{display}</Detect>
+                <Home onPress={()=> navigation.navigate('Home')}>Return Home</Home>
             </View>
         </View>
     )
@@ -87,7 +61,7 @@ const styles = StyleSheet.create({
         fontSize: 45,
         fontWeight: 'bold',
         color: '#04a4f4',
-        marginBottom: 25,
+        marginBottom: 40,
         textAlign: 'center',
     },
     body: {
