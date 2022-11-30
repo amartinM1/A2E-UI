@@ -5,7 +5,7 @@ import {
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
-import Camera from 'react-native-camera';
+import {RNCamera} from 'react-native-camera';
 
 function Profile({onPress, children}) {
     return (
@@ -45,7 +45,12 @@ function detection() {
 }
 
 function StartCamera() {
-   
+   <RNCamera ref={cam => {this.camera = cam;}} 
+           style={styles.preview}
+           aspect={Camera.constants.aspect.fill} >
+        <Text onPress={this.takePicture.bind(this)} style={styles.capture}>Take Picture</Text>
+    </RNCamera>
+
 }
 
 function Home({navigation}) {
