@@ -4,9 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 //pages
 import Launch from '../pages/launch';
-import Settings from '../pages/settings';
+import Connect from '../pages/connect';
 import Home from '../pages/home';
-import { Settings } from 'react-native';
 
 //stacks
 const LaunchStack = createNativeStackNavigator();
@@ -28,7 +27,7 @@ function Navigator() {
                 />
                 <LaunchStack.Screen
                     name="Settings"
-                    component={Settings}
+                    component={Connect}
                     options={{heeaderShown: false}}
                 />
             </LaunchStack.Navigator>

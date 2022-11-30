@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+
 import {
     Text,
     View,
@@ -13,7 +14,7 @@ function Home({onPress, children}) {
         </TouchableOpacity>
     )
 }
-function Settings({onPress, children}) {
+function Detect({onPress, children}) {
     return (
         <TouchableOpacity onPress={onPress} style={styles.button}>
             <Text style={styles.button_text}>{children}</Text>
@@ -23,14 +24,16 @@ function Settings({onPress, children}) {
 
 
 
-function detection(onPress) {
+
+//var display = document.getElementById('Detect');
+function detection({onPress, display}) {
     //var sock = new WebSocket("ws://localhost:5001");
     var sock = new WebSocket("ws://10.0.2.15:3000");  //replace this address with the one the node.js server prints out. keep port 3000
-    var display=document.getElementById("display");
+    var display=document.getElementById("Detect");
     
-    sock.onopen=function(onPress){
+    sock.onopen = (onPress) =>{
         //alert("Socket connected succesfully!!!")
-        setTimeout(function(){sock.send('connection succeeded');},1000);
+        setTimeout(() => {sock.send('connection succeeded');},1000);
         display.innerHTML+="connection succeeded <br />";
     };
     sock.onmessage=function(onPress){
@@ -39,7 +42,7 @@ function detection(onPress) {
     }
 }
 
-function Settings({navigation}) {
+function Connect({navigation}) {
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -49,7 +52,7 @@ function Settings({navigation}) {
                 <Text style={styles.title}></Text>
                 <Text style={styles.body}></Text>
                 <Home onPress={()=> navigation.navigate('Launch')}>Return Home</Home>
-                <Detect onPress={() => detection(onPress) }></Detect>
+                <Detect onPress={() => detection() }>{display}</Detect>
             </View>
         </View>
     )
@@ -110,4 +113,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Settings;
+export default Connect;
