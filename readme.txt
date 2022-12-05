@@ -10,6 +10,11 @@ If you run into errors first try deleting the node_module directory and then run
     npm install
     yarn android
 
+If reinstalling node modules does not working you can try cleaning the gradle build:
+    cd android &&./gradlew clean
+    cd ..
+    yarn android
+
 If you get an error regarding watchman failing try running the following:
     watchman watch-del-all && watchman shutdown-server
     yarn android
