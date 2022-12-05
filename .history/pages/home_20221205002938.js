@@ -58,7 +58,7 @@ function Home({navigation}) {
                 <Text style={styles.heading}>Translated Text</Text>
                 <Text style={styles.text}>Hi my name is Maya.  <Text style={styles.highlight}>1:03</Text></Text>
                 <Text style={styles.text}> What is your name?   <Text style={styles.highlight}>1:07</Text></Text>
-                
+
                 </View>
             </View>
         </View>

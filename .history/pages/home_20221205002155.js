@@ -54,11 +54,12 @@ function Home({navigation}) {
                 </View>
                 <View style={styles.verticle_line}></View>
                 <View style={styles.right_screen}>
+                <Text style={styles.text}>{buttonPresses}</Text>
+
                 
-                <Text style={styles.heading}>Translated Text</Text>
-                <Text style={styles.text}>Hi my name is Maya.  <Text style={styles.highlight}>1:03</Text></Text>
-                <Text style={styles.text}> What is your name?   <Text style={styles.highlight}>1:07</Text></Text>
-                
+
+            
+
                 </View>
             </View>
         </View>
@@ -167,21 +168,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         textAlign: 'right',
       },
-      heading: {
-        fontSize: 32,
-        marginTop: '10%',
-        alignSelf: 'center',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignContent: 'center',
-      },
       text: {
-        fontSize: 28,
-        marginTop: '5%',
-        alignSelf: 'left',
-        alignItems: 'left',
-        justifyContent: 'left',
-        alignContent: 'left',
+        fontSize: 32,
+       
       },
 })
 
