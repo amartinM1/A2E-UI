@@ -54,15 +54,10 @@ function Home({navigation}) {
                 </View>
                 <View style={styles.verticle_line}></View>
                 <View style={styles.right_screen}>
-                    <Text style={styles.heading}>Translated Text</Text>
-                    <View style={styles.textbox}>
-                        <Text style={styles.highlight}>1:03</Text>
-                        <Text style={styles.text}>Hi my name is Maya.</Text>
-                    </View>
-                    <View style={styles.textbox}>
-                        <Text style={styles.highlight}>1:07</Text>
-                        <Text style={styles.text}>What is your name?</Text>
-                    </View>
+                
+                <Text style={styles.text}>Hi my name is Maya.  <Text style={styles.highlight}>1:03</Text></Text>
+                <Text style={styles.text}> What is your name?   <Text style={styles.highlight}>1:07</Text></Text>
+
                 </View>
             </View>
         </View>
@@ -103,7 +98,6 @@ const styles = StyleSheet.create({
     },
     profile_text: {
         fontSize: 23,
-        padding: 2,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: '#04a4f4',
@@ -111,7 +105,6 @@ const styles = StyleSheet.create({
     },
     settings_text: {
         fontSize: 23,
-        padding: 2,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: '#04a4f4',
@@ -169,34 +162,18 @@ const styles = StyleSheet.create({
         marginBottom: '4%',
         textAlign: 'center',
     },
-    heading: {
-        fontSize: 32,
-        fontWeight: '600',
-        marginTop: '5%',
-        marginBottom: '2.5%',
-        alignSelf: 'center',
-        justifyContent: 'center',
-    },
-    textbox: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignItems: 'flex-start',
-        marginTop: '2%',
-    },
-    text: {
-        fontSize: 22,
-        textAlign: 'left',
-        width: '72.5%',
-        paddingRight: '2.5%',
-    },
     highlight: {
-        fontSize: 22,
-        paddingLeft: '2.5%',
-        paddingRight: '2.5%',
         fontWeight: '700',
-        textAlign: 'center',
-        width: '20%',
-    },
+        textAlign: 'right',
+      },
+      text: {
+        fontSize: 32,
+        marginTop: '10%',
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+      },
 })
 
 export default Home;
