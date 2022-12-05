@@ -37,19 +37,19 @@ function StartCamera() {
 function Home({navigation}) {
     return (
         <View style={styles.container}>
-            <View style={styles.top_container}>
+            <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
+            </View>
+            <View style={styles.top_container}>
                 <Profile onPress={() => navigation.navigate('Launch') }>Profile</Profile>
                 <Settings onPress={() => navigation.navigate('Launch') }>Settings</Settings>
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
-                    <Text style={styles.body}>Left</Text>
                     <CameraButton onPress={() => StartCamera()}>Start Camera</CameraButton>
                 </View>
                 <View style={styles.verticle_line}></View>
                 <View style={styles.right_screen}>
-                    <Text style={styles.body}>Right</Text>
                 </View>
             </View>
         </View>
@@ -65,28 +65,35 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         backgroundColor: '#F5F5F5',
     },
+    background_container: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#F5F5F5',
+    },
     top_container: {
         width: '100%',
         height: '7.5%',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        alignItems: 'center',
-        alignContent: 'center',
+        justifyContent: 'flex-end',
     },
     logo: {
         fontSize: 45,
         fontWeight: 'bold',
         color: '#04a4f4',
         textAlign: 'left',
-        width: '50%',
         marginLeft: '1%',
+        marginTop: '0.5%',
     },
     profile_text: {
         fontSize: 23,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: '#04a4f4',
-        textAlign: 'center',
+        textAlign: 'right',
     },
     settings_text: {
         fontSize: 23,
@@ -96,10 +103,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     profile: {
-        marginLeft: '30%',
+        width: '25%',
     },
     settings: {
-        marginLeft: '3%',
+        width: '25%',
     },
     main_container: {
         width: '100%',
@@ -107,7 +114,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'flex-end',
-        alignContent: 'flex-end',
     },
     left_screen: {
         width: '49.8%',
@@ -119,7 +125,7 @@ const styles = StyleSheet.create({
     },
     verticle_line:{
         height: '90%',
-        width: 2,
+        width: '0.2%',
         backgroundColor: '#909090',
         alignSelf: 'center',
     },
@@ -131,7 +137,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#04a4f4',
         padding: 10,
         borderRadius: 50,
-        width: 250,
+        width: '50%',
+        marginTop: '10%',
     },
     button_text:{
         marginBottom: 2,
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '400',
         color: 'black',
-        marginBottom: 80,
+        marginBottom: '4%',
         textAlign: 'center',
     },
 })

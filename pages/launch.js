@@ -59,14 +59,14 @@ const styles = StyleSheet.create({
         fontSize: 45,
         fontWeight: 'bold',
         color: '#04a4f4',
-        marginBottom: 25,
+        marginBottom: '2.5%',
         textAlign: 'center',
     },
     body: {
         fontSize: 20,
         fontWeight: '400',
         color: '#04a4f4',
-        marginBottom: 80,
+        marginBottom: '4%',
         textAlign: 'center',
     },
     button: {

@@ -1,4 +1,18 @@
-npm installl:
+Setting up the development enviroment:
+https://reactnative.dev/docs/environment-setup 
 
-npm install @react-navigation/native @react-navigation/native-stack
-npm install react-native-screens react-native-safe-area-context
+To launch the app run:
+    npm install
+    yarn android
+
+If you run into errors first try deleting the node_module directory and then running npm install:
+    rm -rf node_modules
+    npm install
+    yarn android
+
+If you get an error regarding watchman failing try running the following:
+    watchman watch-del-all && watchman shutdown-server
+    yarn android
+
+If that does not resolve the watchman errors, you can try giving watchman full desktop access: 
+https://stackoverflow.com/a/64328425/20381576 
