@@ -2,11 +2,22 @@ import React, {Component,useState} from 'react';
 
 import {
     Text,
+    TextInput,
     View,
     StyleSheet,
     TouchableOpacity,
-    Pressable
+    Pressable,
+    ScrollView,
+    AsyncStorage,
 } from 'react-native';
+
+function EditText({onPress, children}) {
+    return (
+        <TouchableOpacity onPress={onPress} style={styles.edit_text}>
+            <Text style={styles.highlight}>{children}</Text>
+        </TouchableOpacity>
+    );
+}
 
 function Profile({onPress, children}) {
     return (
@@ -36,9 +47,28 @@ function StartCamera() {
 
 }
 
+const TextBox = (props) => {
+    const[canEdit, setEdit] = useState(false);
+    const[color, setColor] = useState('black');
+    function toggle() {
+        if(!canEdit) {
+            setColor('gray');
+        }
+        else {
+            setColor('black');
+        }
+        setEdit(!canEdit);
+    }
+    return (
+        <View style={styles.textbox}>
+            <EditText onPress={() => toggle()} setEditable={canEdit}>{props.time}</EditText>
+            <TextInput style={styles.text} color={color} editable={canEdit} multiline={true}>{props.msg}</TextInput>
+        </View>
+    )
+}
+
 function Home({navigation}) {
-    
-    const [buttonPresses, setButtonPresses] = useState(0);
+    const[canEdit, setEdit] = useState(false);
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -53,20 +83,29 @@ function Home({navigation}) {
                     <CameraButton onPress={() => StartCamera()}>Start Camera</CameraButton>
                 </View>
                 <View style={styles.verticle_line}></View>
-                <View style={styles.right_screen}>
-                    <Text style={styles.heading}>Translated Text</Text>
-                    <View style={styles.textbox}>
-                        <Text style={styles.highlight}>1:03</Text>
-                        <Text style={styles.text}>Hi my name is Maya.</Text>
-                    </View>
-                    <View style={styles.textbox}>
-                        <Text style={styles.highlight}>1:07</Text>
-                        <Text style={styles.text}>What is your name?</Text>
-                    </View>
-                </View>
+                <ScrollView style={styles.right_screen}>
+                    <TextBox time='1:03' msg="Hi, my name is Maya."/>        
+                    <TextBox time='1:04' msg="What's your name?"/>  
+                    <TextBox time='1:10' msg="It is really nice to meet you Alex!"/>  
+                    <TextBox time='1:13' msg="How was your day?"/>  
+                    <TextBox time='1:20' msg="Where do you want to meet up? 
+                    We could go to the beach or we could go to the mall."/>  
+                    <TextBox time='1:28' msg="The beach sounds perfect to me."/> 
+                    <TextBox time='1:30' msg="I'm so excited."/> 
+                    <TextBox time='1:32' msg="Will the weather be good?"/>   
+                    <TextBox time='1:38' msg="What time did you say to meet up?"/>   
+                    <TextBox time='1:42' msg="Noon."/>   
+                    <TextBox time='1:48' msg="What day?"/>   
+                    <TextBox time='1:53' msg="Perfect!"/>
+                    <TextBox time='1:57' msg="Should I bring anything?"/>
+                    <TextBox time='2:03' msg="I can do that."/>
+                    <TextBox time='2:10' msg="I'll see you on Saturday."/>  
+                    <TextBox time='2:15' msg="Bye."/>       
+                </ScrollView>
             </View>
         </View>
     );
+    //<Text style={styles.heading}>Translated Text</Text>
 }
 
 const styles = StyleSheet.create({
@@ -102,16 +141,16 @@ const styles = StyleSheet.create({
         marginTop: '0.5%',
     },
     profile_text: {
-        fontSize: 23,
-        padding: 2,
+        fontSize: 25,
+        paddingTop: 4,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: '#04a4f4',
         textAlign: 'right',
     },
     settings_text: {
-        fontSize: 23,
-        padding: 2,
+        fontSize: 25,
+        paddingTop: 4,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: '#04a4f4',
@@ -136,7 +175,8 @@ const styles = StyleSheet.create({
     },
     right_screen: {
         width: '49.8%',
-        height: '100%',
+        height: '94%',
+        alignSelf: 'center',
     },
     verticle_line:{
         height: '90%',
@@ -170,12 +210,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     heading: {
-        fontSize: 32,
-        fontWeight: '600',
+        fontSize: 30,
+        fontWeight: '800',
         marginTop: '5%',
         marginBottom: '2.5%',
         alignSelf: 'center',
         justifyContent: 'center',
+        fontFamily: 'Savoye LET',
+        color: '#04a4f4',
     },
     textbox: {
         flexDirection: 'row',
@@ -184,18 +226,20 @@ const styles = StyleSheet.create({
         marginTop: '2%',
     },
     text: {
-        fontSize: 22,
+        fontSize: 25,
         textAlign: 'left',
         width: '72.5%',
         paddingRight: '2.5%',
     },
     highlight: {
-        fontSize: 22,
-        paddingLeft: '2.5%',
-        paddingRight: '2.5%',
+        fontSize: 25,
         fontWeight: '700',
         textAlign: 'center',
+    },
+    edit_text: {
         width: '20%',
+        paddingLeft: '2.5%',
+        paddingRight: '2.5%',
     },
 })
 
