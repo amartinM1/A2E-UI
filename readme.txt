@@ -20,8 +20,7 @@ To launch the app run:
     yarn android
 
 If you run into errors first try deleting the node_module directory and then running npm install:
-    rm -rf node_modules
-    npm install
+    rm -rf node_modules && npm install
     yarn android
 
 If reinstalling node modules does not working you can try cleaning the gradle build:

@@ -1,4 +1,6 @@
-import React, {Component,useState} from 'react';
+import React, {Component,useEffect,useState} from 'react';
+import database from '@react-native-firebase/database';
+import * as User from './profile';
 
 import {
     Text,
@@ -9,6 +11,7 @@ import {
     Pressable,
     ScrollView,
     AsyncStorage,
+    FlatList, 
 } from 'react-native';
 
 function EditText({onPress, children}) {
@@ -47,28 +50,159 @@ function StartCamera() {
 
 }
 
-const TextBox = (props) => {
+async function getTime() {
+    var hours = await new Date().getHours(); //Current Hours
+    var min = await new Date().getMinutes(); //Current Minutes
+    var sec = await new Date().getSeconds(); //Current Seconds
+    hours += '';
+    min += '';
+    sec += '';
+    if(hours.length == 1) {
+        hours = '0' + hours;
+    }
+    if(min.length == 1) {
+        min = '0' + min;
+    }
+    if(sec.length == 1) {
+        sec = '0' + sec;
+    }
+    var date = (hours + ':' + min + ':' + sec);
+    console.log('current time: ' + date);
+    return date;
+}
+
+async function EditMessage(message) {
+    await database()
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .update({
+            [message.time] : message.msg,
+        })
+        .then(() => console.log(`updated message at: ${message.time}`));
+    return;
+}
+
+async function DeleteMessage(message) {
+    await database()
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .remove()
+        .then(() => console.log(`deleted message at: ${message.time}`));
+    return;
+}
+
+function TextBox({message, reload}) {
     const[canEdit, setEdit] = useState(false);
     const[color, setColor] = useState('black');
-    function toggle() {
+    useEffect(() => {
+        if(message.time == '+' && !canEdit) {
+            setColor('#04a4f4');
+        }
+
+    });
+    async function toggle() {
         if(!canEdit) {
-            setColor('gray');
+            if(message.time == '+') {
+                setColor('#98dcfd');
+            }
+            else {
+                setColor('gray');
+            }
         }
         else {
-            setColor('black');
+            if(message.time == '+') {
+                if(message.msg != "add message") {
+                    setColor('black');
+                    message.time = await getTime();
+                    if(message.msg.length == 0) {
+                        DeleteMessage(message);
+                    }
+                    else {
+                        EditMessage(message);
+                    }
+                }
+                else {
+                    setColor('#04a4f4');
+                }
+            }
+            else {
+                setColor('black');
+                if(message.msg.length == 0) {
+                    DeleteMessage(message);
+                }
+                else {
+                    EditMessage(message);
+                }
+            }
         }
         setEdit(!canEdit);
+        reload();
+    }
+    function saveChange(value) {
+        message.msg = value;
+        console.log(value);
     }
     return (
         <View style={styles.textbox}>
-            <EditText onPress={() => toggle()} setEditable={canEdit}>{props.time}</EditText>
-            <TextInput style={styles.text} color={color} editable={canEdit} multiline={true}>{props.msg}</TextInput>
+            <EditText 
+                style={styles.time}
+                onPress={() => toggle()} 
+                setEditable={canEdit}
+            >
+                {message.time}
+            </EditText>
+            <TextInput 
+                style={styles.text} 
+                color={color} 
+                editable={canEdit} 
+                multiline={true}
+                onChangeText={(value) => saveChange(value)}
+            > 
+                {message.msg}
+            </TextInput>
         </View>
-    )
+    );
+};
+
+// async and await make function wait to finish read before returning
+async function GetMessages() {
+    var messages = [];
+    await database()
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .once("value") 
+        .then((snapshot) => {
+            snapshot.forEach((child) => {
+                var message = {};
+                message['time'] = child.key;
+                message['msg'] = child.val();
+                messages.push(message);
+            })
+            var message = {};
+            message['time'] = '+';
+            message['msg'] = "add message";
+            messages.push(message);
+        });
+    console.log(messages);
+    return messages;
 }
 
 function Home({navigation}) {
-    const[canEdit, setEdit] = useState(false);
+    const [messages, setMessages] = useState([{"msg": "Loading...", "time": ""}]);
+
+    const fetchData = async () => {
+        const data = await GetMessages();
+        setMessages(data);
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const renderItem = ({item}) => (
+        <TextBox 
+            message={item} 
+            reload={() => fetchData()}
+        />
+    );
+
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -83,30 +217,15 @@ function Home({navigation}) {
                     <CameraButton onPress={() => StartCamera()}>Start Camera</CameraButton>
                 </View>
                 <View style={styles.verticle_line}></View>
-                <ScrollView style={styles.right_screen}>
-                    <TextBox time='1:03' msg="Hi, my name is Maya."/>        
-                    <TextBox time='1:04' msg="What's your name?"/>  
-                    <TextBox time='1:10' msg="It is really nice to meet you Alex!"/>  
-                    <TextBox time='1:13' msg="How was your day?"/>  
-                    <TextBox time='1:20' msg="Where do you want to meet up? 
-                    We could go to the beach or we could go to the mall."/>  
-                    <TextBox time='1:28' msg="The beach sounds perfect to me."/> 
-                    <TextBox time='1:30' msg="I'm so excited."/> 
-                    <TextBox time='1:32' msg="Will the weather be good?"/>   
-                    <TextBox time='1:38' msg="What time did you say to meet up?"/>   
-                    <TextBox time='1:42' msg="Noon."/>   
-                    <TextBox time='1:48' msg="What day?"/>   
-                    <TextBox time='1:53' msg="Perfect!"/>
-                    <TextBox time='1:57' msg="Should I bring anything?"/>
-                    <TextBox time='2:03' msg="I can do that."/>
-                    <TextBox time='2:10' msg="I'll see you on Saturday."/>  
-                    <TextBox time='2:15' msg="Bye."/>       
-                </ScrollView>
+                <FlatList style={styles.right_screen}
+                    data={messages}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.time}
+                />
             </View>
         </View>
     );
-    //<Text style={styles.heading}>Translated Text</Text>
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -222,13 +341,12 @@ const styles = StyleSheet.create({
     textbox: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        alignItems: 'flex-start',
         marginTop: '2%',
     },
     text: {
         fontSize: 25,
         textAlign: 'left',
-        width: '72.5%',
+        width: '75%',
         paddingRight: '2.5%',
     },
     highlight: {
@@ -237,7 +355,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     edit_text: {
-        width: '20%',
+        width: '22.5%',
         paddingLeft: '2.5%',
         paddingRight: '2.5%',
     },
