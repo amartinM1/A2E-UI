@@ -138,7 +138,6 @@ function TextBox({message, reload}) {
     }
     function saveChange(value) {
         message.msg = value;
-        console.log(value);
     }
     return (
         <View style={styles.textbox}>
