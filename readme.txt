@@ -27,6 +27,8 @@ If reinstalling node modules does not working you can try cleaning the gradle bu
     cd android && ./gradlew clean && cd ..
     yarn android
 
+If the database idles on loading on the home page, do a cold boot of your android emulator. 
+
 If you get an error regarding watchman failing try running the following:
     watchman watch-del-all && watchman shutdown-server
     yarn android

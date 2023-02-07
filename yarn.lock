@@ -2363,7 +2363,7 @@
   "resolved" "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz"
   "version" "1.1.2"
 
-"buffer@^5.5.0":
+"buffer@^5.4.3", "buffer@^5.5.0":
   "integrity" "sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ=="
   "resolved" "https://registry.npmjs.org/buffer/-/buffer-5.7.1.tgz"
   "version" "5.7.1"
@@ -3066,6 +3066,11 @@
   "integrity" "sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ=="
   "resolved" "https://registry.npmjs.org/event-target-shim/-/event-target-shim-5.0.1.tgz"
   "version" "5.0.1"
+
+"eventemitter3@^4.0.7":
+  "integrity" "sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw=="
+  "resolved" "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz"
+  "version" "4.0.7"
 
 "exec-async@^2.2.0":
   "integrity" "sha512-87OpwcEiMia/DeiKFzaQNBNFeN3XkkpYIh9FyOqq5mS2oKv3CBE67PXoEKcr6nodWdXNogTiQ0jE2NGuoffXPw=="
@@ -5597,6 +5602,14 @@
     "react-freeze" "^1.0.0"
     "warn-once" "^0.1.0"
 
+"react-native-tcp-socket@^6.0.3":
+  "integrity" "sha512-YY659DLvI6x+FzVP2DYjSGXrlVfYh7HBPea6sUMtJUKNk/gnw0x1gcsyytVTwi2Y3QUqvxAqljGywIh4tt7E5g=="
+  "resolved" "https://registry.npmjs.org/react-native-tcp-socket/-/react-native-tcp-socket-6.0.3.tgz"
+  "version" "6.0.3"
+  dependencies:
+    "buffer" "^5.4.3"
+    "eventemitter3" "^4.0.7"
+
 "react-native-web@~0.18.7":
   "integrity" "sha512-BaV5Mpe7u9pN5vTRDW2g+MLh6PbPBJZpXRQM3Jr2cNv7hNa3sxCGh9T+NcW6wOFzf/+USrdrEPI1M9wNyr7vyA=="
   "resolved" "https://registry.npmjs.org/react-native-web/-/react-native-web-0.18.9.tgz"
@@ -5610,7 +5623,7 @@
     "postcss-value-parser" "^4.2.0"
     "styleq" "^0.1.2"
 
-"react-native@*", "react-native@>=0.42.0", "react-native@>=0.57", "react-native@0.70.5":
+"react-native@*", "react-native@>=0.42.0", "react-native@>=0.57", "react-native@>=0.60.0", "react-native@0.70.5":
   "integrity" "sha512-5NZM80LC3L+TIgQX/09yiyy48S73wMgpIgN5cCv3XTMR394+KpDI3rBZGH4aIgWWuwijz31YYVF5504+9n2Zfw=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.70.5.tgz"
   "version" "0.70.5"

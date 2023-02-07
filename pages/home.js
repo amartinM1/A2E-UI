@@ -1,7 +1,9 @@
-import React, {Component,useEffect,useState} from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
-
+import ServerConnection from '../server/server';
+//import TcpSocket from 'react-native-tcp-socket';
+import TcpSocket from 'react-native-tcp-socket';
 import {
     Text,
     TextInput,
@@ -14,42 +16,23 @@ import {
     FlatList, 
 } from 'react-native';
 
-function EditText({onPress, children}) {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.edit_text}>
-            <Text style={styles.highlight}>{children}</Text>
-        </TouchableOpacity>
-    );
-}
 
-function Profile({onPress, children}) {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.profile}>
-                <Text style={styles.profile_text}>{children}</Text>
-        </TouchableOpacity>
-    );
-}
 
-function Settings({onPress, children}) {
+// Button Object
+function Button({onPress, children, toStyle, textStyle}) {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.settings}>
-                <Text style={styles.settings_text}>{children}</Text>
+        <TouchableOpacity onPress={onPress} style={toStyle}>
+            <Text style={textStyle}>{children}</Text>
         </TouchableOpacity>
-    );
-}
-
-function CameraButton({onPress, children}) {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.button}>
-                <Text style={styles.button_text}>{children}</Text>
-        </TouchableOpacity>
-    );
+    ); 
 }
 
 function StartCamera() {
-
+// launch ssh script? 
 }
 
+
+// async and await make function wait to finish read before returning
 async function getTime() {
     var hours = await new Date().getHours(); //Current Hours
     var min = await new Date().getMinutes(); //Current Minutes
@@ -71,6 +54,28 @@ async function getTime() {
     return date;
 }
 
+// database functions 
+async function GetMessages() {
+    var messages = [];
+    await database()
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .once("value") 
+        .then((snapshot) => {
+            snapshot.forEach((child) => {
+                var message = {};
+                message['time'] = child.key;
+                message['msg'] = child.val();
+                messages.push(message);
+            })
+            var message = {};
+            message['time'] = '+';
+            message['msg'] = "add message";
+            messages.push(message);
+        });
+    //console.log(messages);
+    return messages;
+}
+
 async function EditMessage(message) {
     await database()
         .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
@@ -87,6 +92,14 @@ async function DeleteMessage(message) {
         .remove()
         .then(() => console.log(`deleted message at: ${message.time}`));
     return;
+}
+
+async function ReceieveData({data, reload}) {
+    var message = [];
+    message.msg = data;
+    message.time = await getTime();
+    EditMessage(data);
+    reload();
 }
 
 function TextBox({message, reload}) {
@@ -141,13 +154,15 @@ function TextBox({message, reload}) {
     }
     return (
         <View style={styles.textbox}>
-            <EditText 
+            <Button 
                 style={styles.time}
                 onPress={() => toggle()} 
+                toStyle={styles.edit_text}
+                textStyle={styles.highlight}
                 setEditable={canEdit}
             >
                 {message.time}
-            </EditText>
+            </Button>
             <TextInput 
                 style={styles.text} 
                 color={color} 
@@ -161,28 +176,6 @@ function TextBox({message, reload}) {
     );
 };
 
-// async and await make function wait to finish read before returning
-async function GetMessages() {
-    var messages = [];
-    await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
-        .once("value") 
-        .then((snapshot) => {
-            snapshot.forEach((child) => {
-                var message = {};
-                message['time'] = child.key;
-                message['msg'] = child.val();
-                messages.push(message);
-            })
-            var message = {};
-            message['time'] = '+';
-            message['msg'] = "add message";
-            messages.push(message);
-        });
-    console.log(messages);
-    return messages;
-}
-
 function Home({navigation}) {
     const [messages, setMessages] = useState([{"msg": "Loading...", "time": ""}]);
 
@@ -193,7 +186,31 @@ function Home({navigation}) {
 
     useEffect(() => {
         fetchData();
+        //ServerConnection(() => ReceieveData(), () => fetchData());
     }, []);
+
+    const server = TcpSocket.createServer(function(socket) {
+        socket.on('data', (data) => {
+            socket.write('Echo server ' + data);
+            console.log('receieved data ' + data);
+        });
+    
+        socket.on('error', (error) => {
+            console.log('An error ocurred with client socket ', error);
+        });
+    
+        socket.on('close', (error) => {
+            console.log('Closed connection with ', socket.address());
+        });
+    }).listen({ port: 5000, host: '' });
+    
+    server.on('error', (error) => {
+        console.log('An error ocurred with the server', error);
+    });
+    
+    server.on('close', () => {
+        console.log('Server closed connection');
+    });
 
     const renderItem = ({item}) => (
         <TextBox 
@@ -208,12 +225,30 @@ function Home({navigation}) {
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.top_container}>
-                <Profile onPress={() => navigation.navigate('Launch') }>Profile</Profile>
-                <Settings onPress={() => navigation.navigate('Launch') }>Settings</Settings>
+                <Button 
+                    onPress={() => navigation.navigate('Launch')}
+                    toStyle={styles.profile}
+                    textStyle={styles.profile_text}
+                >
+                    Profile
+                </Button>
+                <Button 
+                    onPress={() => navigation.navigate('Launch')}
+                    toStyle={styles.settings}
+                    textStyle={styles.settings_text}
+                >
+                    Settings
+                </Button>
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
-                    <CameraButton onPress={() => StartCamera()}>Start Camera</CameraButton>
+                    <Button 
+                        onPress={() => StartCamera()}
+                        toStyle={styles.button}
+                        textStyle={styles.button_text}
+                    >
+                        Start Camera
+                    </Button>
                 </View>
                 <View style={styles.verticle_line}></View>
                 <FlatList style={styles.right_screen}
