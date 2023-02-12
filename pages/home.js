@@ -255,6 +255,7 @@ function Home({navigation}) {
                     data={messages}
                     renderItem={renderItem}
                     keyExtractor={item => item.time}
+                    removeClippedSubviews={false}
                 />
             </View>
         </View>
@@ -330,6 +331,7 @@ const styles = StyleSheet.create({
         width: '49.8%',
         height: '94%',
         alignSelf: 'center',
+        keyboardDismissMode: 'none', 
     },
     verticle_line:{
         height: '90%',
@@ -378,18 +380,18 @@ const styles = StyleSheet.create({
         marginTop: '2%',
     },
     text: {
-        fontSize: 25,
+        fontSize: 22,
         textAlign: 'left',
-        width: '75%',
+        width: '70%',
         paddingRight: '2.5%',
     },
     highlight: {
-        fontSize: 25,
+        fontSize: 22,
         fontWeight: '700',
         textAlign: 'center',
     },
     edit_text: {
-        width: '22.5%',
+        width: '27.5%',
         paddingLeft: '2.5%',
         paddingRight: '2.5%',
     },

@@ -14,6 +14,9 @@ npx react-native run-android
 
 The current application boots up with the launch page and features the translation page
 
+On Android Tablet:
+    npx react-native run-android
+
 On Mac:
 To launch the app run:
     npm install
