@@ -226,14 +226,14 @@ function Home({navigation}) {
             </View>
             <View style={styles.top_container}>
                 <Button 
-                    onPress={() => navigation.navigate('Launch')}
+                    onPress={() => navigation.navigate('Profile')}
                     toStyle={styles.profile}
                     textStyle={styles.profile_text}
                 >
                     Profile
                 </Button>
                 <Button 
-                    onPress={() => navigation.navigate('Launch')}
+                    onPress={() => navigation.navigate('Settings')}
                     toStyle={styles.settings}
                     textStyle={styles.settings_text}
                 >

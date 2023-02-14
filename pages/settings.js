@@ -6,10 +6,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-export const username = "admin";
-export const current_transcript = "example log";
-
-function Profile({navigation}) {
+function Settings({navigation}) {
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -49,4 +46,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Profile;
+export default Settings;

@@ -1,7 +1,7 @@
 import TcpSocket from 'react-native-tcp-socket';
 
 // Server connection to python ML output
-const port = 5000;
+const port = 7000;
 const host = '';
 
 function ServerConnection({PostMessage, reload}) {
