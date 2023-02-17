@@ -38,7 +38,7 @@ function Settings({navigation}) {
                         >
                         -
                 </Button>
-          
+
                 
             </View>
         </View>
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'stretch',
     },
     logo: {
         fontSize: 45,

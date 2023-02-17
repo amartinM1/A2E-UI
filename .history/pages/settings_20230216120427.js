@@ -38,7 +38,7 @@ function Settings({navigation}) {
                         >
                         -
                 </Button>
-          
+
                 
             </View>
         </View>
@@ -72,13 +72,6 @@ const styles = StyleSheet.create({
         marginTop: '0.5%',
     },
     button1: {
-        alignItems: 'center',
-        backgroundColor: '#04a4f4',
-        padding: 5,
-        borderRadius: 30,
-        width: 100,
-    },
-    button2: {
         alignItems: 'center',
         backgroundColor: '#04a4f4',
         padding: 5,

@@ -26,19 +26,19 @@ function Settings({navigation}) {
             <View style={styles.main_container}>
                 <Button 
                             onPress={() =>setFontSize(fontSize + 2)}
-                            toStyle={styles.button1}
+                            toStyle={styles.button}
                             textStyle={styles.button_text}
                         >
                         +
                 </Button>
                 <Button 
                             onPress={() =>setFontSize(fontSize - 2)}
-                            toStyle={styles.button2}
+                            toStyle={styles.button}
                             textStyle={styles.button_text}
                         >
                         -
                 </Button>
-          
+
                 
             </View>
         </View>
@@ -71,14 +71,7 @@ const styles = StyleSheet.create({
         marginLeft: '1%',
         marginTop: '0.5%',
     },
-    button1: {
-        alignItems: 'center',
-        backgroundColor: '#04a4f4',
-        padding: 5,
-        borderRadius: 30,
-        width: 100,
-    },
-    button2: {
+    button: {
         alignItems: 'center',
         backgroundColor: '#04a4f4',
         padding: 5,

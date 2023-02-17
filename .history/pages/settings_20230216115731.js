@@ -6,15 +6,6 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-// Button Object
-function Button({onPress, children, toStyle, textStyle}) {
-    return (
-        <TouchableOpacity onPress={onPress} style={toStyle}>
-            <Text style={textStyle}>{children}</Text>
-        </TouchableOpacity>
-    ); 
-}
-
 function Settings({navigation}) {
 
     const [fontSize, setFontSize] = useState(16);
@@ -24,22 +15,14 @@ function Settings({navigation}) {
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
-                <Button 
-                            onPress={() =>setFontSize(fontSize + 2)}
-                            toStyle={styles.button1}
-                            textStyle={styles.button_text}
-                        >
-                        +
-                </Button>
-                <Button 
-                            onPress={() =>setFontSize(fontSize - 2)}
-                            toStyle={styles.button2}
-                            textStyle={styles.button_text}
-                        >
-                        -
-                </Button>
-          
-                
+                <button onClick = {() =>setfontSize(fontSize + 2)}>
+                    +
+                </button>
+                <button onClick = {() =>setFontSize(fontSize - 2)}>
+                    -
+                </button>
+
+                <Text style={{fontsize: `${fontSize}px` }}>Lorem</Text>
             </View>
         </View>
     );
@@ -71,19 +54,12 @@ const styles = StyleSheet.create({
         marginLeft: '1%',
         marginTop: '0.5%',
     },
-    button1: {
+    button: {
         alignItems: 'center',
         backgroundColor: '#04a4f4',
-        padding: 5,
-        borderRadius: 30,
-        width: 100,
-    },
-    button2: {
-        alignItems: 'center',
-        backgroundColor: '#04a4f4',
-        padding: 5,
-        borderRadius: 30,
-        width: 100,
+        padding: 10,
+        borderRadius: 50,
+        width: 250,
     },
     button_text: {
         marginBottom: 2,

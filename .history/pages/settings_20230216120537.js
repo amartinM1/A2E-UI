@@ -38,7 +38,7 @@ function Settings({navigation}) {
                         >
                         -
                 </Button>
-          
+
                 
             </View>
         </View>

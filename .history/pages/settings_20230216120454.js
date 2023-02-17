@@ -38,7 +38,7 @@ function Settings({navigation}) {
                         >
                         -
                 </Button>
-          
+
                 
             </View>
         </View>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         width: 100,
     },
     button2: {
-        alignItems: 'center',
+        alignItems: 'right',
         backgroundColor: '#04a4f4',
         padding: 5,
         borderRadius: 30,
