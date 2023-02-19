@@ -1,8 +1,6 @@
 import React, {Component, useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
-import ServerConnection from '../server/server';
-//import TcpSocket from 'react-native-tcp-socket';
 import TcpSocket from 'react-native-tcp-socket';
 import {
     Text,
@@ -94,11 +92,14 @@ async function DeleteMessage(message) {
     return;
 }
 
-async function ReceieveData({data, reload}) {
-    var message = [];
+async function ReceiveData(data, reload) {
+    //console.log('reciev data function!!!!!!!!!!!');
+    console.log(data);
+    var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
-    EditMessage(data);
+    console.log(message);
+    EditMessage(message);
     reload();
 }
 
@@ -109,7 +110,6 @@ function TextBox({message, reload}) {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
         }
-
     });
     async function toggle() {
         if(!canEdit) {
@@ -177,40 +177,39 @@ function TextBox({message, reload}) {
 };
 
 function Home({navigation}) {
-    const [messages, setMessages] = useState([{"msg": "Loading...", "time": ""}]);
+    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
 
-    const fetchData = async () => {
-        const data = await GetMessages();
-        setMessages(data);
-    };
-
-    useEffect(() => {
-        fetchData();
-        //ServerConnection(() => ReceieveData(), () => fetchData());
-    }, []);
-
-    const server = TcpSocket.createServer(function(socket) {
-        socket.on('data', (data) => {
-            socket.write('Echo server ' + data);
-            console.log('receieved data ' + data);
-        });
-    
-        socket.on('error', (error) => {
-            console.log('An error ocurred with client socket ', error);
-        });
-    
-        socket.on('close', (error) => {
-            console.log('Closed connection with ', socket.address());
-        });
-    }).listen({ port: 5000, host: '' });
-    
-    server.on('error', (error) => {
+    /*server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
     });
     
     server.on('close', () => {
         console.log('Server closed connection');
-    });
+    });*/
+
+    const fetchData = async () => {
+        const data = await GetMessages();
+        setMessages(data);
+    };
+    useEffect(() => {
+        fetchData();
+        const server = TcpSocket.createServer(function(socket) {
+            socket.on('data', (data) => {
+                socket.write('Echo server ' + data);
+                console.log('receieved data ' + data);
+                ReceiveData(String(data), fetchData);
+            });
+                
+            socket.on('error', (error) => {
+                console.log('An error ocurred with client socket ', error);
+            });
+                
+            socket.on('close', (error) => {
+                console.log('Closed connection with ', socket.address());
+            });
+        }).listen({ port: 4000, host: '10.140.10.9' , reuseAddress: true });
+        console.log('creating server');
+    }, []);
 
     const renderItem = ({item}) => (
         <TextBox 

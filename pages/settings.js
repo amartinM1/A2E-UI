@@ -31,6 +31,10 @@ function Settings({navigation}) {
                         >
                         +
                 </Button>
+                <View style={styles.break}/>
+                <Text style = {{fontSize: `${fontSize}px`}}>
+                Lorem ipsum
+                </Text>
                 <Button 
                             onPress={() =>setFontSize(fontSize - 2)}
                             toStyle={styles.button2}
@@ -76,14 +80,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#04a4f4',
         padding: 5,
         borderRadius: 30,
-        width: 100,
+        width: '400%',
     },
     button2: {
         alignItems: 'center',
         backgroundColor: '#04a4f4',
         padding: 5,
         borderRadius: 30,
-        width: 100,
+        width: '400%',
     },
     button_text: {
         marginBottom: 2,
@@ -92,6 +96,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#FFFFFF',
     },
+    break: {
+        height: '5%',
+        
+    },
+    setFontSettings: {
+        fontSize: 25,
+        
+    },
+
   
 });
 
