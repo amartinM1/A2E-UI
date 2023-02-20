@@ -2,6 +2,7 @@ import React, {Component, useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
+import dgram from 'react-native-udp';
 import {
     Text,
     TextInput,
@@ -26,7 +27,9 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 function StartCamera() {
-// launch ssh script? 
+    console.log('Start Camera Pressed');
+    // launch ssh script? 
+    // start udp connection 
 }
 
 
@@ -93,12 +96,9 @@ async function DeleteMessage(message) {
 }
 
 async function ReceiveData(data, reload) {
-    //console.log('reciev data function!!!!!!!!!!!');
-    console.log(data);
     var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
-    console.log(message);
     EditMessage(message);
     reload();
 }
@@ -178,37 +178,72 @@ function TextBox({message, reload}) {
 
 function Home({navigation}) {
     const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+    const [tcp_server, setTCPServer] = useState(TcpSocket.createServer());
+    const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4'}));
+    const [tcp_connected, setTCPConnected] = useState(false);
+    const [udp_connected, setUDPConnected] = useState(false);
 
-    /*server.on('error', (error) => {
+    tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
     });
-    
-    server.on('close', () => {
+
+    tcp_server.on('close', () => {
         console.log('Server closed connection');
-    });*/
+    });
+
+    udp_socket.on('message', function(msg, rinfo) {
+        console.log('Message received', msg)
+    });
+
+    udp_socket.on('error', (error) => {
+        console.log('An error occured with the UDP Socket');
+    });
+
+    useEffect(() => {
+        if(!udp_connected) {
+            udp_socket.bind(6000, '10.136.220.172');
+            setUDPSocket(udp_socket);
+            setUDPConnected(true);
+        }
+
+        udp_socket.once('listening', function() {
+            udp_socket.send('Hello World!', 0, 65536, 6000, '10.136.220.172', function(err) {
+                if (err) throw err
+                console.log('Message sent!')
+            })
+        });
+    });
 
     const fetchData = async () => {
         const data = await GetMessages();
         setMessages(data);
     };
+
     useEffect(() => {
         fetchData();
-        const server = TcpSocket.createServer(function(socket) {
-            socket.on('data', (data) => {
-                socket.write('Echo server ' + data);
-                console.log('receieved data ' + data);
-                ReceiveData(String(data), fetchData);
-            });
-                
-            socket.on('error', (error) => {
-                console.log('An error ocurred with client socket ', error);
-            });
-                
-            socket.on('close', (error) => {
-                console.log('Closed connection with ', socket.address());
-            });
-        }).listen({ port: 4000, host: '10.140.10.9' , reuseAddress: true });
-        console.log('creating server');
+    }, []);
+
+    useEffect(() => {
+        if(!tcp_connected) {
+            const server = TcpSocket.createServer(function(tcp_socket) {
+                tcp_socket.on('data', (data) => {
+                    tcp_socket.write('Echo server ' + data);
+                    console.log('receieved data ' + data);
+                    ReceiveData(String(data), fetchData);
+                });
+                    
+                tcp_socket.on('error', (error) => {
+                    console.log('An error ocurred with client socket ', error);
+                });
+                    
+                tcp_socket.on('close', (error) => {
+                    console.log('Closed connection with ', tcp_socket.address());
+                });
+            }).listen({ port: 4000, host: '10.136.49.55' , reuseAddress: true });
+            console.log('Creating TCP Server');
+            setTCPServer(server);
+            setTCPConnected(true);
+        }
     }, []);
 
     const renderItem = ({item}) => (
