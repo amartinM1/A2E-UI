@@ -3,6 +3,8 @@ import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
+import ImgToBase64 from 'react-native-image-base64'
+import base64 from 'react-native-base64';
 import {
     Text,
     TextInput,
@@ -12,10 +14,29 @@ import {
     Pressable,
     ScrollView,
     AsyncStorage,
-    FlatList, 
+    FlatList,
+    Image,
+    EventEmitter,
 } from 'react-native';
 
-
+// Video Object
+/*function Frames({msg}) {
+   /* return (
+        <Image 
+            style={styles.image} 
+            source={{uri: `data:image/png;base64,${msg}`}}
+        />
+    ); 
+    let url = msg;
+    if (msg.indexOf("data:image/png;base64,") > -1) {
+      let decodedPng = base64.decode(
+        msg.replace("data:image/png;base64,", "")
+      );
+      let blob = new Blob([decodedPng], { type: "image/png+xml" });
+      url = URL.createObjectURL(blob);
+    }
+    return (<img src={url}/>);    
+}*/
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -179,10 +200,10 @@ function TextBox({message, reload}) {
 function Home({navigation}) {
     const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
     const [tcp_server, setTCPServer] = useState(TcpSocket.createServer());
-    const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4'}));
+    const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
-
+    const [frame, setFrame] = useState([]);
     tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
     });
@@ -192,7 +213,8 @@ function Home({navigation}) {
     });
 
     udp_socket.on('message', function(msg, rinfo) {
-        console.log('Message received', msg)
+        //setFrame(msg);
+        console.log(msg);
     });
 
     udp_socket.on('error', (error) => {
@@ -201,13 +223,13 @@ function Home({navigation}) {
 
     useEffect(() => {
         if(!udp_connected) {
-            udp_socket.bind(6000, '10.136.220.172');
+            udp_socket.bind(6000, '10.136.49.55');
             setUDPSocket(udp_socket);
             setUDPConnected(true);
         }
 
         udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 6000, '10.136.220.172', function(err) {
+            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.220.172', function(err) {
                 if (err) throw err
                 console.log('Message sent!')
             })
@@ -428,6 +450,10 @@ const styles = StyleSheet.create({
         width: '27.5%',
         paddingLeft: '2.5%',
         paddingRight: '2.5%',
+    },
+    image: {
+        width: '100%',
+        
     },
 })
 
