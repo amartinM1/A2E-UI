@@ -5,6 +5,10 @@ import {
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
+//import "./dynamicfont.js";
+//import dynamicfont from './dynamicfont.js';
+import changeFont from './dynamicfont.js';
+import externalStyle from './dynamicfont.js';
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -16,34 +20,39 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 function Settings({navigation}) {
+ 
+    const changeFont =() => {
 
-    const [fontSize, setFontSize] = useState(16);
+        setFontSize(fontSize+5);
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
+            <Text style={externalStyle.fontOne}>Welcome to A2E</Text>
+                <Text style={externalStyle.fontTwo}>Welcome to A2E</Text>
+                <Text style={externalStyle.fontThree}>Welcome to A2E</Text>
+                <Text style={externalStyle.fontFour}>Welcome to A2E</Text>
                 <Button 
-                            onPress={() =>setFontSize(fontSize + 2)}
+                            onPress={() => changeFont}
                             toStyle={styles.button1}
                             textStyle={styles.button_text}
                         >
                         +
                 </Button>
                 <View style={styles.break}/>
-                <Text style = {{fontSize: `${fontSize}px`}}>
-                Lorem ipsum
-                </Text>
                 <Button 
-                            onPress={() =>setFontSize(fontSize - 2)}
+                            onPress={() => changeFont}
                             toStyle={styles.button2}
                             textStyle={styles.button_text}
                         >
                         -
                 </Button>
-          
-                
+
+            
             </View>
         </View>
     );
@@ -66,6 +75,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        //flexDirection: 'column',
     },
     logo: {
         fontSize: 45,
@@ -80,14 +90,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#04a4f4',
         padding: 5,
         borderRadius: 30,
-        width: '400%',
+        width: 100,
     },
     button2: {
         alignItems: 'center',
         backgroundColor: '#04a4f4',
         padding: 5,
         borderRadius: 30,
-        width: '400%',
+        width: 100,
     },
     button_text: {
         marginBottom: 2,
@@ -100,11 +110,6 @@ const styles = StyleSheet.create({
         height: '5%',
         
     },
-    setFontSettings: {
-        fontSize: 25,
-        
-    },
-
   
 });
 
