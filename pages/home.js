@@ -1,10 +1,13 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {Component, useEffect, useState, useRef} from 'react';
+import ReactDOM from 'react-dom';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
 import ImgToBase64 from 'react-native-image-base64'
 import base64 from 'react-native-base64';
+
+
 import {
     Text,
     TextInput,
@@ -38,6 +41,7 @@ import {
     return (<img src={url}/>);    
 }*/
 
+
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
     return (
@@ -47,10 +51,12 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
-function StartCamera() {
-    console.log('Start Camera Pressed');
-    // launch ssh script? 
-    // start udp connection 
+
+function StartCamera({Frame}) {
+    // display frame
+    return (
+        <Text>{Frame}</Text>
+      );
 }
 
 
@@ -204,6 +210,8 @@ function Home({navigation}) {
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
     const [frame, setFrame] = useState([]);
+    const [shouldShow, setShouldShow] = useState(false);
+
     tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
     });
@@ -213,8 +221,8 @@ function Home({navigation}) {
     });
 
     udp_socket.on('message', function(msg, rinfo) {
-        //setFrame(msg);
-        console.log(msg);
+        setFrame(JSON.parse(JSON.stringify(msg))["data"]);
+        console.log('got a UDP message!!', JSON.parse(JSON.stringify(msg))["data"]);
     });
 
     udp_socket.on('error', (error) => {
@@ -223,13 +231,13 @@ function Home({navigation}) {
 
     useEffect(() => {
         if(!udp_connected) {
-            udp_socket.bind(6000, '10.136.49.55');
+            udp_socket.bind(6000, '10.136.140.5');
             setUDPSocket(udp_socket);
             setUDPConnected(true);
         }
 
         udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.220.172', function(err) {
+            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.253.90', function(err) {
                 if (err) throw err
                 console.log('Message sent!')
             })
@@ -261,7 +269,7 @@ function Home({navigation}) {
                 tcp_socket.on('close', (error) => {
                     console.log('Closed connection with ', tcp_socket.address());
                 });
-            }).listen({ port: 4000, host: '10.136.49.55' , reuseAddress: true });
+            }).listen({ port: 4000, host: '10.136.140.5' , reuseAddress: true });
             console.log('Creating TCP Server');
             setTCPServer(server);
             setTCPConnected(true);
@@ -299,12 +307,19 @@ function Home({navigation}) {
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Button 
-                        onPress={() => StartCamera()}
+                        onPress={() => setShouldShow(!shouldShow)}
                         toStyle={styles.button}
                         textStyle={styles.button_text}
                     >
                         Start Camera
                     </Button>
+                    {shouldShow ?
+                            (
+                            <StartCamera
+                                Frame={frame}
+                            >
+                            </StartCamera>
+                            ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
                 <FlatList style={styles.right_screen}
@@ -455,6 +470,17 @@ const styles = StyleSheet.create({
         width: '100%',
         
     },
+    Icontainer: {
+        paddingTop: 50,
+      },
+      ItinyLogo: {
+        width: 50,
+        height: 50,
+      },
+      Ilogo: {
+        width: 66,
+        height: 58,
+      },
 })
 
 export default Home;
