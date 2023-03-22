@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "node_modules/@klarna/react-native-zlib/android/src/main/AndroidManifest.xml",
+      "sha1": "aa8a20f249fb1790a767924a81d333e414926927"
+    },
+    {
+      "path": "node_modules/@klarna/react-native-zlib/android/src/main/java/com/klarna/reactnative/zlib/RNReactNativeZlibModule.java",
+      "sha1": "76e4b34b0fd880957f4f31c5ca2791c3933103e6"
+    },
+    {
+      "path": "node_modules/@klarna/react-native-zlib/android/src/main/java/com/klarna/reactnative/zlib/RNReactNativeZlibPackage.java",
+      "sha1": "c6a759fe213b7fe668728d310b319fd1507db5bd"
+    }
+  ]
+}

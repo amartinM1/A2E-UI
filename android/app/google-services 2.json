@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "546483343982",
+    "firebase_url": "https://a2e-db-default-rtdb.firebaseio.com",
+    "project_id": "a2e-db",
+    "storage_bucket": "a2e-db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546483343982:android:5a730926b4b79381390c7f",
+        "android_client_info": {
+          "package_name": "com.a2e"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "546483343982-lgkv27lffb23k5idlrkna5l5l60jdvmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFxAmvaLORPDLVtkqJVDzJRg1fCwSNtD0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "546483343982-lgkv27lffb23k5idlrkna5l5l60jdvmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,18 +1,9 @@
-import React, {Component, useEffect, useState, useRef, useCallback, useReducer, useMemo} from 'react';
-import ReactDOM from 'react-dom';
+import React, {Component, useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
+import ServerConnection from '../server/server';
+//import TcpSocket from 'react-native-tcp-socket';
 import TcpSocket from 'react-native-tcp-socket';
-import dgram from 'react-native-udp';
-import {decode, encode} from 'base-64'
-import events from "events"
-import zlib from 'react-zlib-js';
-import FastImage from 'react-native-fast-image'
-import ImageView from 'react-native-image-view';
-import Video from 'react-native-video';
-
-import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
-
 import {
     Text,
     TextInput,
@@ -22,12 +13,10 @@ import {
     Pressable,
     ScrollView,
     AsyncStorage,
-    FlatList,
-    Image,
-    EventEmitter,
+    FlatList, 
 } from 'react-native';
 
-events.EventEmitter.defaultMaxListeners = 100
+
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -38,26 +27,10 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
-
-function StartCamera({udp}) {
-
-      return (
-
-        <View style={{ flex: 1,
-                                         justifyContent: 'center',
-                                         alignItems: 'center',
-                                         padding:25}}>
-        <VLCPlayer
-                source={{ uri: "http://10.136.58.3:5000/video_feed" }}
-                style={[styles.Ilogo]}
-                paused={false}
-                autoAspectRatio={true}
-                resizeMode={"fill"}
-            />
-
-        </View>
-      );
+function StartCamera() {
+// launch ssh script? 
 }
+
 
 // async and await make function wait to finish read before returning
 async function getTime() {
@@ -121,11 +94,11 @@ async function DeleteMessage(message) {
     return;
 }
 
-async function ReceiveData(data, reload) {
-    var message = {msg: "", time: ""};
+async function ReceieveData({data, reload}) {
+    var message = [];
     message.msg = data;
     message.time = await getTime();
-    EditMessage(message);
+    EditMessage(data);
     reload();
 }
 
@@ -136,6 +109,7 @@ function TextBox({message, reload}) {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
         }
+
     });
     async function toggle() {
         if(!canEdit) {
@@ -203,43 +177,7 @@ function TextBox({message, reload}) {
 };
 
 function Home({navigation}) {
-    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
-    const [tcp_server, setTCPServer] = useState(TcpSocket.createServer());
-    const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
-    const [tcp_connected, setTCPConnected] = useState(false);
-    const [udp_connected, setUDPConnected] = useState(false);
-    const [shouldShow, setShouldShow] = useState(false);
-    const socket = 1;
-
-    tcp_server.on('error', (error) => {
-        console.log('An error ocurred with the server', error);
-    });
-
-    tcp_server.on('close', () => {
-        console.log('Server closed connection');
-    });
-    console.log("home was ran")
-
-
-    udp_socket.on('error', (error) => {
-        console.log('An error occured with the UDP Socket');
-    });
-
-    useEffect(() => {
-        if(!udp_connected) {
-            udp_socket.bind(6000, '10.136.140.5');
-            setUDPSocket(udp_socket);
-            setUDPConnected(true);
-        }
-
-        udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.255.136', function(err) {
-                if (err) throw err
-                console.log('Message sent!')
-            })
-        });
-
-    });
+    const [messages, setMessages] = useState([{"msg": "Loading...", "time": ""}]);
 
     const fetchData = async () => {
         const data = await GetMessages();
@@ -248,30 +186,31 @@ function Home({navigation}) {
 
     useEffect(() => {
         fetchData();
+        //ServerConnection(() => ReceieveData(), () => fetchData());
     }, []);
 
-    useEffect(() => {
-        if(!tcp_connected) {
-            const server = TcpSocket.createServer(function(tcp_socket) {
-                tcp_socket.on('data', (data) => {
-                    tcp_socket.write('Echo server ' + data);
-                    console.log('receieved data ' + data);
-                    ReceiveData(String(data), fetchData);
-                });
-                    
-                tcp_socket.on('error', (error) => {
-                    console.log('An error ocurred with client socket ', error);
-                });
-                    
-                tcp_socket.on('close', (error) => {
-                    console.log('Closed connection with ', tcp_socket.address());
-                });
-            }).listen({ port: 4000, host: '10.136.140.5' , reuseAddress: true });
-            console.log('Creating TCP Server');
-            setTCPServer(server);
-            setTCPConnected(true);
-        }
-    }, []);
+    const server = TcpSocket.createServer(function(socket) {
+        socket.on('data', (data) => {
+            socket.write('Echo server ' + data);
+            console.log('receieved data ' + data);
+        });
+    
+        socket.on('error', (error) => {
+            console.log('An error ocurred with client socket ', error);
+        });
+    
+        socket.on('close', (error) => {
+            console.log('Closed connection with ', socket.address());
+        });
+    }).listen({ port: 5000, host: '' });
+    
+    server.on('error', (error) => {
+        console.log('An error ocurred with the server', error);
+    });
+    
+    server.on('close', () => {
+        console.log('Server closed connection');
+    });
 
     const renderItem = ({item}) => (
         <TextBox 
@@ -279,6 +218,7 @@ function Home({navigation}) {
             reload={() => fetchData()}
         />
     );
+
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -303,18 +243,12 @@ function Home({navigation}) {
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Button 
-                        onPress={() => setShouldShow(!shouldShow)}
+                        onPress={() => StartCamera()}
                         toStyle={styles.button}
                         textStyle={styles.button_text}
                     >
                         Start Camera
                     </Button>
-                    {shouldShow ?
-                            (
-                                <StartCamera
-                                    udp={udp_socket}
-                                />
-                            ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
                 <FlatList style={styles.right_screen}
@@ -414,7 +348,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 50,
         width: '50%',
-        marginTop: '5%',
+        marginTop: '10%',
     },
     button_text:{
         marginBottom: 2,
@@ -461,19 +395,6 @@ const styles = StyleSheet.create({
         paddingLeft: '2.5%',
         paddingRight: '2.5%',
     },
-    image: {
-        width: '100%',
-        
-    },
-    Icontainer: {
-        padding: 20,
-      },
-      Ilogo: {
-        alignSelf: 'center',
-        width: '100%',
-        height: '100%',
-      },
-
 })
 
 export default Home;

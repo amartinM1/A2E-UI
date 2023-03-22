@@ -14,6 +14,9 @@ npx react-native run-android
 
 The current application boots up with the launch page and features the translation page
 
+On Android Tablet:
+    npx react-native run-android
+
 On Mac:
 To launch the app run:
     npm install
@@ -26,6 +29,8 @@ If you run into errors first try deleting the node_module directory and then run
 If reinstalling node modules does not working you can try cleaning the gradle build:
     cd android && ./gradlew clean && cd ..
     yarn android
+
+If the database idles on loading on the home page, do a cold boot of your android emulator. 
 
 If you get an error regarding watchman failing try running the following:
     watchman watch-del-all && watchman shutdown-server
