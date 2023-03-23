@@ -10,6 +10,7 @@ import zlib from 'react-zlib-js';
 import FastImage from 'react-native-fast-image'
 import ImageView from 'react-native-image-view';
 import Video from 'react-native-video';
+import Speech_Text from './speech';
 
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
 
@@ -309,12 +310,16 @@ function Home({navigation}) {
                     >
                         Start Camera
                     </Button>
+                    <Speech_Text />
+                    {/* <View style={{ flex: 1 }}>
+                        <Speech_Text />
+                    </View> */}
                     {shouldShow ?
-                            (
-                                <StartCamera
-                                    udp={udp_socket}
-                                />
-                            ) : null}
+                        (
+                            <StartCamera
+                                udp={udp_socket}
+                            />
+                        ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
                 <FlatList style={styles.right_screen}
