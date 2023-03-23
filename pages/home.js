@@ -1,16 +1,17 @@
-import React, {Component, useEffect, useState, useRef} from 'react';
+import React, {Component, useEffect, useState, useRef, useCallback, useReducer, useMemo} from 'react';
 import ReactDOM from 'react-dom';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
 import {decode, encode} from 'base-64'
-/*if (!global.btoa) {
-    global.btoa = encode;
-}
-if (!global.atob) {
-    global.atob = decode;
-}*/
+import events from "events"
+import zlib from 'react-zlib-js';
+import FastImage from 'react-native-fast-image'
+import ImageView from 'react-native-image-view';
+import Video from 'react-native-video';
+
+import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
 
 import {
     Text,
@@ -26,25 +27,7 @@ import {
     EventEmitter,
 } from 'react-native';
 
-// Video Object
-/*function Frames({msg}) {
-   /* return (
-        <Image 
-            style={styles.image} 
-            source={{uri: `data:image/png;base64,${msg}`}}
-        />
-    ); 
-    let url = msg;
-    if (msg.indexOf("data:image/png;base64,") > -1) {
-      let decodedPng = base64.decode(
-        msg.replace("data:image/png;base64,", "")
-      );
-      let blob = new Blob([decodedPng], { type: "image/png+xml" });
-      url = URL.createObjectURL(blob);
-    }
-    return (<img src={url}/>);    
-}*/
-
+events.EventEmitter.defaultMaxListeners = 100
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -56,19 +39,24 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 
-function StartCamera({Frame}) {
-    // display frame
-    var image = 'data:image/jpg;base64,'+Frame;
-    console.log(image)
+function StartCamera({udp}) {
 
-    return (
-        <View style={styles.Icontainer}>
-           <Image
-                style={styles.Ilogo}
-                source= {{uri: 'data:image/jpg;base64,'+Frame}}
+      return (
+
+        <View style={{ flex: 1,
+                                         justifyContent: 'center',
+                                         alignItems: 'center',
+                                         padding:25}}>
+        <VLCPlayer
+                source={{ uri: "http://10.136.58.3:5000/video_feed" }}
+                style={[styles.Ilogo]}
+                paused={false}
+                autoAspectRatio={true}
+                resizeMode={"fill"}
             />
-       </View>
-    );
+
+        </View>
+      );
 }
 
 // async and await make function wait to finish read before returning
@@ -220,9 +208,8 @@ function Home({navigation}) {
     const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
-    const [frame, setFrame] = useState([]);
     const [shouldShow, setShouldShow] = useState(false);
-    const [getFrame, setGetFrame] = useState(true);
+    const socket = 1;
 
     tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
@@ -231,20 +218,8 @@ function Home({navigation}) {
     tcp_server.on('close', () => {
         console.log('Server closed connection');
     });
+    console.log("home was ran")
 
-    udp_socket.on('message', async function(msg, rinfo) {
-//        if(getFrame) {
-//            setFrame(encode(String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"]))));
-//            await setGetFrame(false);
-//        }
-//        else {
-//            setTimeout(() => {
-//                setGetFrame(true);
-//            }, 1000);
-//        }
-        setFrame(String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"])));
-        console.log('got a UDP message!!',String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"])));
-    });
 
     udp_socket.on('error', (error) => {
         console.log('An error occured with the UDP Socket');
@@ -258,11 +233,12 @@ function Home({navigation}) {
         }
 
         udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.63.60', function(err) {
+            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.255.136', function(err) {
                 if (err) throw err
                 console.log('Message sent!')
             })
         });
+
     });
 
     const fetchData = async () => {
@@ -303,7 +279,6 @@ function Home({navigation}) {
             reload={() => fetchData()}
         />
     );
-
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -336,9 +311,9 @@ function Home({navigation}) {
                     </Button>
                     {shouldShow ?
                             (
-                            <StartCamera
-                                Frame={frame}
-                            />
+                                <StartCamera
+                                    udp={udp_socket}
+                                />
                             ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
@@ -439,7 +414,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 50,
         width: '50%',
-        marginTop: '10%',
+        marginTop: '5%',
     },
     button_text:{
         marginBottom: 2,
@@ -491,16 +466,14 @@ const styles = StyleSheet.create({
         
     },
     Icontainer: {
-        paddingTop: 50,
-      },
-      ItinyLogo: {
-        width: 50,
-        height: 50,
+        padding: 20,
       },
       Ilogo: {
-        width: 66,
-        height: 58,
+        alignSelf: 'center',
+        width: '100%',
+        height: '100%',
       },
+
 })
 
 export default Home;
