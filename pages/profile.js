@@ -1,15 +1,25 @@
-import React, {Component, useState} from 'react';
+import React, {Component,useEffect, useState} from 'react';
+import database from '@react-native-firebase/database';
+import { MyProvider } from '../components/myContext.js';
+import MyComponent from '../components/myComponent.js';
 import {
     Text,
     View,
     StyleSheet,
     TouchableOpacity, 
-    TextInput
+    TextInput,
+    ScrollView,
+    FlatList,
 } from 'react-native';
 
-export const username = "admin";
-export const current_transcript = "example log";
-
+export const username = "test";
+export const current_transcript = "test log";
+//Global use state to access tets_user input on home and transcripts page
+/*export const myState = () => {
+    const [test_user, setUser] = useState('testing username');
+   
+    return {test_user, setUser};
+}*/
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -21,35 +31,68 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 
+
+
 function Profile({navigation}) {
-    const [email, setEmail] = useState('username');
+    const [test_user, setUser] = useState('user');
+   //const [test_user, setUser] = myState();
+   /* onClickLogin = () => {
+     setEmail(test_user);
+     //let test_user = this.test_user;
+     navigation.navigate('Transcripts');
+    }
+    handleUserChange = function(event){
+        setEmail(event);
+    }*/
+      
     return (
+        
+
         <View style={styles.container}>
+            
             <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
+        
             <View style={styles.inputView}>
                 <TextInput
                     style={styles.TextInput}
                     placeholder="Username"
-                    placeholderTextColor="#04a4f4"
-                    onChangeText={(email) => setEmail(email)}
+                    placeholderTextColor="#d3d3d3"
+                    onChangeText={(test_user) => setUser({test_user})}
+                 
                     /> 
                     
                 </View>
             
                 <View style={styles.break}/>
-        <Button 
-                            onPress={() => navigation.navigate('Home')}
+                <View style={styles.right_screen}>
+                <Button 
+                           
+                            onPress={() =>navigation.navigate('Transcripts')}
                             toStyle={styles.loginBtn}
                             textStyle={styles.loginText}
                         >
-                       LOGIN
+                       Login
                 </Button>
-
+                <View style={styles.btn_break}/>
+                <Button 
+                            onPress={() =>navigation.navigate('Transcripts')}
+                            //onPress={this.onClickLogin}
+                            toStyle={styles.regBtn}
+                            textStyle={styles.regText}
+                        >
+                       Register
+                </Button>
+               </View>
+                
             </View>
+           
+                    
+                
         </View>
+      
     );
 }
 
@@ -96,7 +139,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderColor: '#04a4f4',
         borderWidth: 1,
-        borderRadius: 15, 
+        borderRadius: 50,
         fontSize: 20,
     },
     inputView: {
@@ -108,7 +151,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         justifyContent: 'center',
         borderWidth: 1,
-        borderRadius: 15, 
+        borderRadius: 50, 
         borderColor: '#04a4f4',
         //marginLeft: 20,
     },
@@ -122,22 +165,80 @@ const styles = StyleSheet.create({
         color: '#fff', 
         textAlign: 'center',
     },
+    regText: {
+        fontSize: 22,
+        color: '#04a4f4', 
+        textAlign: 'center',
+    },
     loginBtn: {
-        backgroundColor:'#04a4f4',
+       
        // flex: 2,
         paddingRight: 30,
         paddingLeft: 30,
         paddingVertical: 10,
-        paddingHorizontal: 15,
+        paddingHorizontal:15,
         justifyContent: 'center',
-        borderWidth: 1,
-        borderRadius: 15, 
+        borderWidth: 2,
+        backgroundColor: '#04a4f4',
         borderColor: '#04a4f4',
+        //padding: 10,
+        borderRadius: 50,
+        width: '18%',
         //marginLeft: 20,
     },
+    regBtn: {
+       
+        // flex: 2,
+         paddingRight: 30,
+         paddingLeft: 30,
+         paddingVertical: 10,
+         paddingHorizontal: 15,
+         justifyContent: 'center',
+         borderWidth: 2,
+         backgroundColor: '#fff',
+         borderColor: '#04a4f4',
+         //padding: 10,
+         borderRadius: 50,
+         //marginLeft: 20,
+         width: '18%',
+     },
     break: {
         height: '3%',
         
+    },
+    btn_break: {
+        width: '5%',
+        
+    },
+    right_screen: {
+        //width: '49.8%',
+       // height: '94%',
+        alignSelf: 'center',
+       // keyboardDismissMode: 'none',
+        fontSize:32,
+        flexDirection: 'row',
+       // color: '#fff', 
+    },
+    textbox: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: '2%',
+    },
+    text: {
+        fontSize: 22,
+        textAlign: 'left',
+        width: '70%',
+        paddingRight: '2.5%',
+    },
+    highlight: {
+        fontSize: 22,
+        fontWeight: '700',
+        textAlign: 'center',
+    },
+    edit_text: {
+        width: '27.5%',
+        paddingLeft: '2.5%',
+        paddingRight: '2.5%',
     },
 });
 
