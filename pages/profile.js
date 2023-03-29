@@ -2,9 +2,12 @@ import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import { MyProvider } from '../components/myContext.js';
 import MyComponent from '../components/myComponent.js';
-import { createGlobalState  } from 'react-hooks-global-state';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+//import { createGlobalState  } from 'react-hooks-global-state';
 import {Link} from 'react-router-dom';
-import {
+import {useSelector, useDispatch} from 'react-redux';
+import {setUser} from '../redux/action';
+import{
     Text,
     View,
     StyleSheet,
@@ -14,8 +17,11 @@ import {
     FlatList,
 } from 'react-native';
 
+
+
+
 //export const username = "test";
-export const current_transcript = "test log";
+//export const current_transcript = "test log";
 //Global use state to access tets_user input on home and transcripts page
 //const [test_user, setUser] = useState('testing username');
 
@@ -29,7 +35,7 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 //////global use state
-const{ setGlobalState, useGlobalState} = createGlobalState({
+/*const{ setGlobalState, useGlobalState} = createGlobalState({
     default_user: '',
 });
 export{useGlobalState, setGlobalState};
@@ -37,14 +43,18 @@ export{useGlobalState, setGlobalState};
 export const profile_obj = <Profile></Profile>;
 
 profile_obj.get_user();
-
+*/
 
 function Profile({navigation}) {
+
+    const {name} = useSelector(state=>state.userReducer); //check this
+    const dispatch = useDispatch();
     //const [test_user, setUser] = useState('user');
     const [test_user, setUser] = useState('');//myState();
-    get_user = () => {
+    dispatch(setUser(name));
+    /*get_user = () => {
         return test_user;
-    }
+    }*/
     /*onClickLogin = () => {
      
      //let test_user = this.test_user;
@@ -53,9 +63,9 @@ function Profile({navigation}) {
     handleUserChange = function(event){
         setEmail(event);
     }*/
-    const handleUserChange = (e) =>{
+    /*const handleUserChange = (e) =>{
         setGlobalState("default_user", e.target.value);
-    }
+    }*/
     return (
         
 
@@ -71,7 +81,7 @@ function Profile({navigation}) {
                     style={styles.TextInput}
                     placeholder="Username"
                     placeholderTextColor="#d3d3d3"
-                    onChangeText={(test_user) => handleUserChange({test_user})}
+                    onChangeText={(value) => dispatch(setUser(value))}
                  
                     /> 
                     

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import dgram from 'react-native-udp';
 import {decode, encode} from 'base-64'
 import events from "events"
