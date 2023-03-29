@@ -2,6 +2,8 @@ import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
 import { MyProvider } from '../components/myContext.js';
 import MyComponent from '../components/myComponent.js';
+import { createGlobalState  } from 'react-hooks-global-state';
+import {Link} from 'react-router-dom';
 import {
     Text,
     View,
@@ -12,14 +14,10 @@ import {
     FlatList,
 } from 'react-native';
 
-export const username = "test";
+//export const username = "test";
 export const current_transcript = "test log";
 //Global use state to access tets_user input on home and transcripts page
-/*export const myState = () => {
-    const [test_user, setUser] = useState('testing username');
-   
-    return {test_user, setUser};
-}*/
+//const [test_user, setUser] = useState('testing username');
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -30,21 +28,34 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
+//////global use state
+const{ setGlobalState, useGlobalState} = createGlobalState({
+    default_user: '',
+});
+export{useGlobalState, setGlobalState};
 
+export const profile_obj = <Profile></Profile>;
+
+profile_obj.get_user();
 
 
 function Profile({navigation}) {
-    const [test_user, setUser] = useState('user');
-   //const [test_user, setUser] = myState();
-   /* onClickLogin = () => {
-     setEmail(test_user);
+    //const [test_user, setUser] = useState('user');
+    const [test_user, setUser] = useState('');//myState();
+    get_user = () => {
+        return test_user;
+    }
+    /*onClickLogin = () => {
+     
      //let test_user = this.test_user;
      navigation.navigate('Transcripts');
     }
     handleUserChange = function(event){
         setEmail(event);
     }*/
-      
+    const handleUserChange = (e) =>{
+        setGlobalState("default_user", e.target.value);
+    }
     return (
         
 
@@ -60,7 +71,7 @@ function Profile({navigation}) {
                     style={styles.TextInput}
                     placeholder="Username"
                     placeholderTextColor="#d3d3d3"
-                    onChangeText={(test_user) => setUser({test_user})}
+                    onChangeText={(test_user) => handleUserChange({test_user})}
                  
                     /> 
                     

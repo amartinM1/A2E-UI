@@ -4,6 +4,8 @@ import { MyProvider } from '../components/myContext.js';
 import MyComponent from '../components/myComponent.js';
 import * as User from './profile';
 import {myState} from './profile';
+import {Profile} from './profile';
+import { setGlobalState, useGlobalState } from './profile';
 import {
     Text,
     View,
@@ -49,10 +51,15 @@ async function getTime() {
 async function GetMessages() {
     var messages = [];
     //const [test_user, setUser] = myState();
-    
+   // console.log(Profile);
+   const [default_user]= useGlobalState("default_user");
+
+   
+    console.log(User.profile);
     await database()
-        //.ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+    .ref(`/users/${default_user}/transcripts/${User.current_transcript}/messages`)
+      //  .ref(`/users/${User.profile_obj.get_user()}/transcripts/${User.current_transcript}/messages`)
+       // .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
         .once("value") 
         .then((snapshot) => {
             snapshot.forEach((child) => {
@@ -173,7 +180,7 @@ function Transcripts({navigation}) {
     //const [email, setUser] = myState();
     const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
 
-
+    
     const fetchData = async () => {
         const data = await GetMessages();
         console.log(data);
