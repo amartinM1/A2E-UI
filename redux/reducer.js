@@ -1,17 +1,19 @@
-import {set_user_name } from './action';
+import {set_user_name, set_user_transcript } from './action';
 
 const initState = {
-    name :'',
+    name :"test",
+    transcript: "test log",
 }
+
 function userReducer(state= initState, action){
-
-    switch(action.type){
-
+    switch(action.type) {
         case set_user_name:
                 return {...state, name: action.payload};
-
-         default:
+        case set_user_transcript:
+            return {...state, transcript: action.payload};
+        default:
             return state;
     }
 }
+
 export default userReducer;

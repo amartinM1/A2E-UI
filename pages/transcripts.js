@@ -1,12 +1,6 @@
 import React, {Component,useEffect, useState} from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import database from '@react-native-firebase/database';
-import { MyProvider } from '../components/myContext.js';
-import MyComponent from '../components/myComponent.js';
-import * as User from './profile';
-import {myState} from './profile';
-import {Profile} from './profile';
-import { setGlobalState, useGlobalState } from './profile';
+import {useSelector, useDispatch} from 'react-redux';
 import {
     Text,
     View,
@@ -16,9 +10,6 @@ import {
     ScrollView,
     FlatList,
 } from 'react-native';
-
-
-
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -49,24 +40,17 @@ async function getTime() {
     console.log('current time: ' + date);
     return date;
 }
-async function GetMessages() {
-    var messages = [];
-    //const [test_user, setUser] = myState();
-   // console.log(Profile);
-   const [default_user]= useGlobalState("default_user");
 
-   
-    console.log(User.profile);
+async function GetMessages(store) {
+    var messages = [];
+    
     await database()
-    .ref(`/users/${default_user}/transcripts/${User.current_transcript}/messages`)
-      //  .ref(`/users/${User.profile_obj.get_user()}/transcripts/${User.current_transcript}/messages`)
-       // .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+    .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
         .once("value") 
         .then((snapshot) => {
             snapshot.forEach((child) => {
                var message = {};
                message['time'] = child.key;
-               //console.log(child.val());
                message['msg'] = child.val();
                messages.push(message);
             })
@@ -76,10 +60,9 @@ async function GetMessages() {
     return messages;
 }
 
-
-async function EditMessage(message) {
+async function EditMessage(message, store) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
         .update({
             [message.time] : message.msg,
         })
@@ -87,9 +70,9 @@ async function EditMessage(message) {
     return;
 }
 
-async function DeleteMessage(message) {
+async function DeleteMessage(message, store) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
         .remove()
         .then(() => console.log(`deleted message at: ${message.time}`));
     return;
@@ -103,7 +86,7 @@ async function ReceiveData(data, reload) {
     reload();
 }
 
-function TextBox({message, reload}) {
+function TextBox({message, reload, store}) {
     const[canEdit, setEdit] = useState(false);
     const[color, setColor] = useState('black');
     useEffect(() => {
@@ -126,10 +109,10 @@ function TextBox({message, reload}) {
                     setColor('black');
                     message.time = await getTime();
                     if(message.msg.length == 0) {
-                        DeleteMessage(message);
+                        DeleteMessage(message, store);
                     }
                     else {
-                        EditMessage(message);
+                        EditMessage(message, store);
                     }
                 }
                 else {
@@ -139,10 +122,10 @@ function TextBox({message, reload}) {
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
-                    DeleteMessage(message);
+                    DeleteMessage(message, store);
                 }
                 else {
-                    EditMessage(message);
+                    EditMessage(message, store);
                 }
             }
         }
@@ -175,19 +158,19 @@ function TextBox({message, reload}) {
         </View>
     );
 };
+
 let itemsRef = database().ref('/items');
 
 function Transcripts({navigation}) {
-    //const [email, setUser] = myState();
     const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+    const store = useSelector(state => state.userReducer); 
+    const dispatch = useDispatch();
 
-    
     const fetchData = async () => {
-        const data = await GetMessages();
+        const data = await GetMessages(store);
         console.log(data);
         setMessages(data);
         return data;
-
     };
     
     useEffect(() => {
@@ -198,20 +181,11 @@ function Transcripts({navigation}) {
         <TextBox
             message={item} 
             reload={() => fetchData()}
+            store={store}
         />
-      
     );
-    /*///////////////added this
-    React.useEffect(() => {
-        itemsRef.on('value', snapshot => {
-          let data = snapshot.val();
-          const items = Object.values(data);
-          setItemsArray(items);
-        });
-      }, []);*/
         
     return (
-        
         <View style={styles.container}>
             <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
@@ -223,15 +197,8 @@ function Transcripts({navigation}) {
                     keyExtractor={item => item.time}
                     removeClippedSubviews={false}
                 />
-            
                 <View style={styles.break}/>
-               
-               
-                
-            </View>
-           
-                    
-                
+            </View>   
         </View>
     );
 }
@@ -262,15 +229,6 @@ const styles = StyleSheet.create({
         marginLeft: '1%',
         marginTop: '0.5%',
     },
-   /* TextInput: {
-        height: 50,
-        //flex: 3,
-        padding: 10,
-        fontSize: 25,
-        marginBottom: 20,
-        paddingLeft: 30,
-        backgroundColor:'#fff',
-    },*/
     TextInput: {
         width: 300,
         height: 40,
@@ -284,7 +242,6 @@ const styles = StyleSheet.create({
     },
     inputView: {
         backgroundColor:'#04a4f4',
-       // flex: 2,
         paddingRight: 30,
         paddingLeft: 30,
         paddingVertical: 10,
@@ -293,7 +250,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 15, 
         borderColor: '#04a4f4',
-        //marginLeft: 20,
     },
     highlight: {
         fontSize: 22,
@@ -307,7 +263,6 @@ const styles = StyleSheet.create({
     },
     loginBtn: {
         backgroundColor:'#04a4f4',
-       // flex: 2,
         paddingRight: 30,
         paddingLeft: 30,
         paddingVertical: 10,
@@ -316,11 +271,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 15, 
         borderColor: '#04a4f4',
-        //marginLeft: 20,
     },
     break: {
         height: '3%',
-        
     },
     right_screen: {
         width: '49.8%',
