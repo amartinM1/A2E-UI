@@ -73,7 +73,7 @@ async function getTime() {
 }
 
 // database functions 
-async function GetMessages(store) {
+async function GetMessages({store}) {
     var messages = [];
     await database()
         .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
@@ -82,8 +82,6 @@ async function GetMessages(store) {
             snapshot.forEach((child) => {
                 var message = {};
                 message['time'] = child.key;
-                console.log(child.val()['usr']);
-
                 message['msg'] = child.val()['msg'];
                 message['usr'] = child.val()['usr'];
                 messages.push(message);
@@ -99,9 +97,9 @@ async function GetMessages(store) {
     return messages;
 }
 
-async function EditMessage(message, store) {
+async function EditMessage({message, store}) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
         .update({
             ['msg'] : message.msg,
             ['usr'] : message.usr,
@@ -110,7 +108,7 @@ async function EditMessage(message, store) {
     return;
 }
 
-async function DeleteMessage(message, store) {
+async function DeleteMessage({message, store}) {
     await database()
         .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
         .remove()
@@ -118,7 +116,7 @@ async function DeleteMessage(message, store) {
     return;
 }
 
-async function ReceiveData(data, usr, reload) {
+async function ReceiveData({data, usr, reload}) {
     var message = {msg: "", time: "", usr: ""};
     message.usr = usr;
     message.msg = data;
@@ -154,10 +152,10 @@ function TextBox({message, reload, store}) {
                     message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
-                        DeleteMessage(message, store);
+                        DeleteMessage({message, store});
                     }
                     else {
-                        EditMessage(message, store);
+                        EditMessage({message, store});
                     }
                 }
                 else {
@@ -168,10 +166,10 @@ function TextBox({message, reload, store}) {
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
-                    DeleteMessage(message, store);
+                    DeleteMessage({message, store});
                 }
                 else {
-                    EditMessage(message, store);
+                    EditMessage({message, store});
                 }
             }
         }
@@ -206,7 +204,7 @@ function TextBox({message, reload, store}) {
 };
 
 function Home({navigation}) {
-    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+    const [messages, setMessages] = useState([{msg: "Loading...", time: "", usr: ""}]);
     const [tcp_server, setTCPServer] = useState(TcpSocket.createServer());
     const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
     const [tcp_connected, setTCPConnected] = useState(false);
@@ -251,7 +249,7 @@ function Home({navigation}) {
     });
 
     const fetchData = async () => {
-        const data = await GetMessages(store);
+        const data = await GetMessages({store});
         setMessages(data);
     };
 

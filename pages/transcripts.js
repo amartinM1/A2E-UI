@@ -41,7 +41,7 @@ async function getTime() {
     return date;
 }
 
-async function GetMessages(store) {
+async function GetMessages({store}) {
     var messages = [];
     
     await database()
@@ -49,28 +49,30 @@ async function GetMessages(store) {
         .once("value") 
         .then((snapshot) => {
             snapshot.forEach((child) => {
-               var message = {};
-               message['time'] = child.key;
-               message['msg'] = child.val();
-               messages.push(message);
+                var message = {};
+                message['time'] = child.key;
+                message['msg'] = child.val()['msg'];
+                message['usr'] = child.val()['usr'];
+                messages.push(message);
+
             })
-        
         });
    // console.log(messages);
     return messages;
 }
 
-async function EditMessage(message, store) {
+async function EditMessage({message, store}) {
     await database()
-        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
+        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
         .update({
-            [message.time] : message.msg,
+            ['msg'] : message.msg,
+            ['usr'] : message.usr,
         })
         .then(() => console.log(`updated message at: ${message.time}`));
     return;
 }
 
-async function DeleteMessage(message, store) {
+async function DeleteMessage({message, store}) {
     await database()
         .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
         .remove()
@@ -78,8 +80,9 @@ async function DeleteMessage(message, store) {
     return;
 }
 
-async function ReceiveData(data, reload) {
-    var message = {msg: "", time: ""};
+async function ReceiveData({data, usr, reload}) {
+    var message = {msg: "", time: "", usr: ""};
+    message.usr = usr;
     message.msg = data;
     message.time = await getTime();
     EditMessage(message);
@@ -109,10 +112,10 @@ function TextBox({message, reload, store}) {
                     setColor('black');
                     message.time = await getTime();
                     if(message.msg.length == 0) {
-                        DeleteMessage(message, store);
+                        DeleteMessage({message, store});
                     }
                     else {
-                        EditMessage(message, store);
+                        EditMessage({message, store});
                     }
                 }
                 else {
@@ -122,10 +125,10 @@ function TextBox({message, reload, store}) {
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
-                    DeleteMessage(message, store);
+                    DeleteMessage({message, store});
                 }
                 else {
-                    EditMessage(message, store);
+                    EditMessage({message, store});
                 }
             }
         }
@@ -162,13 +165,13 @@ function TextBox({message, reload, store}) {
 let itemsRef = database().ref('/items');
 
 function Transcripts({navigation}) {
-    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+    const [messages, setMessages] = useState([{msg: "Loading...", time: "", usr: ""}]);
     const store = useSelector(state => state.userReducer); 
     const dispatch = useDispatch();
 
     const fetchData = async () => {
-        const data = await GetMessages(store);
-        console.log(data);
+        const data = await GetMessages({store});
+        //console.log(data);
         setMessages(data);
         return data;
     };
