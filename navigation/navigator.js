@@ -8,6 +8,7 @@ import Home from '../pages/home';
 import Profile from '../pages/profile';
 import Settings from '../pages/settings';
 import Speech_Text from '../pages/speech';
+import Transcripts from '../pages/transcripts';
 
 //stacks
 const LaunchStack = createNativeStackNavigator();
@@ -36,8 +37,8 @@ function Navigator() {
                     component={Settings}
                 />
                 <LaunchStack.Screen 
-                    name="Speech_Text"
-                    component={Speech_Text}
+                    name="Transcripts"
+                    component={Transcripts}
                 />
             </LaunchStack.Navigator>
         </NavigationContainer>
