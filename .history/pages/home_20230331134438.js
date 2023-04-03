@@ -3,9 +3,9 @@ import database from '@react-native-firebase/database';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
 import events from "events"
-import Voice from '@react-native-voice/voice';
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
 import {useSelector, useDispatch} from 'react-redux';
+import {setUser, setTranscript} from '../redux/action';
 import {
     Text,
     TextInput,
@@ -82,17 +82,12 @@ async function GetMessages(store) {
             snapshot.forEach((child) => {
                 var message = {};
                 message['time'] = child.key;
-                console.log(child.val()['usr']);
-
-                message['msg'] = child.val()['msg'];
-                message['usr'] = child.val()['usr'];
+                message['msg'] = child.val();
                 messages.push(message);
-
             })
             var message = {};
             message['time'] = '+';
             message['msg'] = "add message";
-            message['usr'] = "asl";
             messages.push(message);
         });
     //console.log(messages);
@@ -101,10 +96,9 @@ async function GetMessages(store) {
 
 async function EditMessage(message, store) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
         .update({
-            ['msg'] : message.msg,
-            ['usr'] : message.usr,
+            [message.time] : message.msg,
         })
         .then(() => console.log(`updated message at: ${message.time}`));
     return;
@@ -118,9 +112,8 @@ async function DeleteMessage(message, store) {
     return;
 }
 
-async function ReceiveData(data, usr, reload) {
-    var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
+async function ReceiveData(data, reload) {
+    var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
     EditMessage(message);
@@ -133,9 +126,6 @@ function TextBox({message, reload, store}) {
     useEffect(() => {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
-        }
-        else if(message.usr == "voice"  && !canEdit){
-            setColor('#039BE5');
         }
     });
     async function toggle() {
@@ -151,7 +141,6 @@ function TextBox({message, reload, store}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message, store);
@@ -164,7 +153,6 @@ function TextBox({message, reload, store}) {
                     setColor('#04a4f4');
                 }
             }
-    
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
@@ -212,10 +200,6 @@ function Home({navigation}) {
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
     const [shouldShow, setShouldShow] = useState(false);
-    const [speechResult, setSpeechResult] = useState('');
-    const [loadingSpeech, setLoadingSpeech] = useState(false);
-    const [speechButton, setSpeechButton] = useState('Start Speech to Text');
-    const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
     const socket = 1;
 
     const store = useSelector(state => state.userReducer); 
@@ -248,6 +232,7 @@ function Home({navigation}) {
                 console.log('Message sent!')
             })
         });
+
     });
 
     const fetchData = async () => {
@@ -263,11 +248,9 @@ function Home({navigation}) {
         if(!tcp_connected) {
             const server = TcpSocket.createServer(function(tcp_socket) {
                 tcp_socket.on('data', (data) => {
-                    // if notspeaking
-                    // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(String(data), fetchData);
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -282,83 +265,6 @@ function Home({navigation}) {
             setTCPServer(server);
             setTCPConnected(true);
         }
-
-    }, []);
-
-    const speechStartHandler = e => {
-        console.log('speechStart successful', e);
-    };
-    
-    const speechEndHandler = e => {
-        setLoadingSpeech(false);
-        console.log('stop handler', e);
-    };
-    
-    const speechResultsHandler = e => {
-        const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
-        setSpeechResult(text);
-    };
-    
-    const startRecording = async () => {
-        setLoadingSpeech(true);
-        try {
-            await Voice.start('en-Us');
-        }
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const stopRecording = async () => {
-        try {
-            await Voice.stop();
-            setLoadingSpeech(false);
-        } 
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const toggleSpeechButtons = () => {
-        if(speechButton == "Start Speech to Text") {
-            startRecording()
-            setSpeechButton('Stop Speech to Text');
-        }
-        else if (speechButton == "Stop Speech to Text") {
-            stopRecording()
-            setSpeechButton('Start Speech to Text');
-        }
-    };
-//use state for dynamically creating speech fiiedl when the speechresult is handled
-    const [val, setVal] = useState([]); //this is esssentially the speechresult use state 
-    const handleAdd =()=> {
-        const speech_msg = [...val,[]]
-        setVal(abc)
-    }
-
-    const handleChange=(onChangeValue,i)=>{
-        const inputdata=[...val]
-        inputdata[i]=onChangeValue.target.value;
-        setVal(inputdata)
-       }
-
-    const togglePredictionButtons = () => {
-        if(predictionsButton == "Start Predictions") {
-            setPredictionsButton('Stop Predictions');
-        }
-        else if (predictionsButton == "Stop Predictions") {
-            setPredictionsButton('Start Predictions');
-        }
-    };
-
-    useEffect(() => {
-        Voice.onSpeechStart = speechStartHandler;
-        Voice.onSpeechEnd = speechEndHandler;
-        Voice.onSpeechResults = speechResultsHandler;
-        return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
     }, []);
 
     const renderItem = ({item}) => (
@@ -388,54 +294,30 @@ function Home({navigation}) {
                 >
                     Settings
                 </Button>
-
-                {/* <Button 
-                    onPress={() => navigation.navigate('Speech_Text')}
-                    toStyle={styles.settings}
-                    textStyle={styles.settings_text}
-                >
-                    Speech
-                </Button> */}
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Button 
                         onPress={() => setShouldShow(!shouldShow)}
                         toStyle={styles.button}
-                        textStyle={styles.button_text}>
+                        textStyle={styles.button_text}
+                    >
                         Start Camera
                     </Button>
                     {shouldShow ?
-                        (
-                            <StartCamera
-                                udp={udp_socket}
-                            />
-                        ) : null}
+                            (
+                                <StartCamera
+                                    udp={udp_socket}
+                                />
+                            ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
-                
-                <View style={styles.right_screen}>
-                    <View style={styles.double_buttons}>
-
-                        <TouchableOpacity onPress={togglePredictionButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{predictionsButton}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={toggleSpeechButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{speechButton}</Text>
-                        </TouchableOpacity>
-                        
-                    </View>
-                    
-        
-
-                    <FlatList style={styles.messages}
-                        data={messages}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.time}
-                        removeClippedSubviews={false}
-                    />
-                </View>
+                <FlatList style={styles.right_screen}
+                    data={messages}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.time}
+                    removeClippedSubviews={false}
+                />
             </View>
         </View>
     );
@@ -509,11 +391,7 @@ const styles = StyleSheet.create({
     right_screen: {
         width: '49.8%',
         height: '94%',
-        keyboardDismissMode: 'none', 
-    },
-    messages: {
-        width: '100%',
-        height: '94%',
+        alignSelf: 'center',
         keyboardDismissMode: 'none', 
     },
     verticle_line:{
@@ -539,44 +417,6 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: '600',
         color: '#FFFFFF',
-    },
-    double_buttons:{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: '3%',
-        marginBottom: 10,
-    },
-    buttons_2:{
-        backgroundColor: '#04a4f4',
-        padding: 10,
-        borderRadius: 50,
-        marginHorizontal: 10,
-        width: '45%',
-        backgroundColor: '#04a4f4',
-    },
-    text_2:{
-        textAlign: 'center',
-        marginBottom: 2,
-        marginTop: 2,
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
-    textInputStyle: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        height:100,
-        borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        shadowOffset: {width: 0, height: 1},
-        shadowRadius: 2,
-        elevation: 2,
-        shadowOpacity: 0.4,
-        color: '#000',
     },
     body: {
         fontSize: 20,

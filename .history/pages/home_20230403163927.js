@@ -1,11 +1,20 @@
 import React, {Component, useEffect, useState, useRef, useCallback, useReducer, useMemo} from 'react';
+import ReactDOM from 'react-dom';
 import database from '@react-native-firebase/database';
+import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
+import {decode, encode} from 'base-64'
 import events from "events"
+import zlib from 'react-zlib-js';
+import FastImage from 'react-native-fast-image'
+import ImageView from 'react-native-image-view';
+import Video from 'react-native-video';
+// import Speech_Text from './speech';
 import Voice from '@react-native-voice/voice';
+
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
-import {useSelector, useDispatch} from 'react-redux';
+
 import {
     Text,
     TextInput,
@@ -31,21 +40,23 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
+
 function StartCamera({udp}) {
-      return (
-        <View style={{ 
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding:25}}
-        >
-            <VLCPlayer
+
+    return (
+
+        <View style={{ flex: 1,
+                                         justifyContent: 'center',
+                                         alignItems: 'center',
+                                         padding:25}}>
+        <VLCPlayer
                 source={{ uri: "http://10.136.58.3:5000/video_feed" }}
                 style={[styles.Ilogo]}
                 paused={false}
                 autoAspectRatio={true}
                 resizeMode={"fill"}
             />
+
         </View>
       );
 }
@@ -73,10 +84,10 @@ async function getTime() {
 }
 
 // database functions 
-async function GetMessages(store) {
+async function GetMessages() {
     var messages = [];
     await database()
-        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
         .once("value") 
         .then((snapshot) => {
             snapshot.forEach((child) => {
@@ -99,7 +110,7 @@ async function GetMessages(store) {
     return messages;
 }
 
-async function EditMessage(message, store) {
+async function EditMessage(message) {
     await database()
         .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
         .update({
@@ -110,9 +121,9 @@ async function EditMessage(message, store) {
     return;
 }
 
-async function DeleteMessage(message, store) {
+async function DeleteMessage(message) {
     await database()
-        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
         .remove()
         .then(() => console.log(`deleted message at: ${message.time}`));
     return;
@@ -127,7 +138,7 @@ async function ReceiveData(data, usr, reload) {
     reload();
 }
 
-function TextBox({message, reload, store}) {
+function TextBox({message, reload}) {
     const[canEdit, setEdit] = useState(false);
     const[color, setColor] = useState('black');
     useEffect(() => {
@@ -154,10 +165,10 @@ function TextBox({message, reload, store}) {
                     message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
-                        DeleteMessage(message, store);
+                        DeleteMessage(message);
                     }
                     else {
-                        EditMessage(message, store);
+                        EditMessage(message);
                     }
                 }
                 else {
@@ -168,10 +179,10 @@ function TextBox({message, reload, store}) {
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
-                    DeleteMessage(message, store);
+                    DeleteMessage(message);
                 }
                 else {
-                    EditMessage(message, store);
+                    EditMessage(message);
                 }
             }
         }
@@ -218,8 +229,6 @@ function Home({navigation}) {
     const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
     const socket = 1;
 
-    const store = useSelector(state => state.userReducer); 
-
     tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
     });
@@ -227,7 +236,6 @@ function Home({navigation}) {
     tcp_server.on('close', () => {
         console.log('Server closed connection');
     });
-
     console.log("home was ran")
 
 
@@ -251,7 +259,7 @@ function Home({navigation}) {
     });
 
     const fetchData = async () => {
-        const data = await GetMessages(store);
+        const data = await GetMessages();
         setMessages(data);
     };
 
@@ -365,7 +373,6 @@ function Home({navigation}) {
         <TextBox 
             message={item} 
             reload={() => fetchData()}
-            store={store}
         />
     );
     return (

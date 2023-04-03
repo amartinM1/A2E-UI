@@ -1,10 +1,6 @@
 import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
-import { MyProvider } from '../components/myContext.js';
-import MyComponent from '../components/myComponent.js';
-import {useSelector, useDispatch} from 'react-redux';
-import {setUser, setTranscript} from '../redux/action';
-import{
+import {
     Text,
     View,
     StyleSheet,
@@ -14,8 +10,9 @@ import{
     FlatList,
 } from 'react-native';
 
-export const username = "test";
-export const current_transcript = "test log";
+export const username = "admin";
+export const current_transcript = "example log";
+
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -26,47 +23,113 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
-function Profile({navigation}) {
 
-    const { name, transcript } = useSelector(state => state.userReducer); 
-    const dispatch = useDispatch();
+async function GetMessages() {
+    var messages = [];
+    /*const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/${userId}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            console.log(snapshot.val());
+          } else {
+            console.log("No data available");
+          }
+        }).catch((error) => {
+          console.error(error);
+    });*/
+    await database()
+        //.ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .ref(`/users/${username}/transcripts/${current_transcript}/messages`)
+        .once("value") 
+        .then((snapshot) => {
+            snapshot.forEach((child) => {
+               var message = {};
+               message['time'] = child.key;
+               //console.log(child.val());
+               message['msg'] = child.val();
+               messages.push(message);
+            })
+        
+        });
+   // console.log(messages);
+    return messages;
+}
+
+let itemsRef = database().ref('/items');
+
+function Profile({navigation}) {
+    const [email, setEmail] = useState('username');
+    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+
+
+    /*const fetchData = async () => {
+        const data = await GetMessages();
+        console.log(data);
+        setMessages(data);
+        return data;
+
+    };
     
+    useEffect(() => {
+        fetchData();
+    }, []);
+    
+    const renderItem = ({item}) => (
+        <Text
+            message={item} 
+            reload={() => fetchData()}
+        />
+      
+    );
+    ///////////////added this
+    React.useEffect(() => {
+        itemsRef.on('value', snapshot => {
+          let data = snapshot.val();
+          const items = Object.values(data);
+          setItemsArray(items);
+        });
+      }, []);*/
+        
     return (
+        
         <View style={styles.container}>
             <View style={styles.background_container}>
                 <Text style={styles.logo}>A2E</Text>
             </View>
-
             <View style={styles.main_container}>
-                <View style={styles.inputView}>
-                    <TextInput
-                        style={styles.TextInput}
-                        placeholder="Username"
-                        placeholderTextColor="#d3d3d3"
-                        onChangeText={(value) => dispatch(setUser(value))}
+        
+            <View style={styles.inputView}>
+                <TextInput
+                    style={styles.TextInput}
+                    placeholder="Username"
+                    placeholderTextColor="#04a4f4"
+                    onChangeText={(email) => setEmail(email)}
                     /> 
+                    
                 </View>
             
                 <View style={styles.break}/>
-
                 <View style={styles.right_screen}>
-                    <Button 
-                        onPress={() => navigation.navigate('Transcripts')}
-                        toStyle={styles.loginBtn}
-                        textStyle={styles.loginText}
-                    >
-                        Login
-                    </Button>
-                    <View style={styles.btn_break}/>
-                    <Button 
-                        onPress={() => navigation.navigate('Transcripts')}
-                        toStyle={styles.regBtn}
-                        textStyle={styles.regText}
-                    >
-                        Register
-                    </Button>
-                </View>
+                <Button 
+                            onPress={() => navigation.navigate('Transcripts')}
+                            toStyle={styles.loginBtn}
+                            textStyle={styles.loginText}
+                        >
+                       Login
+                </Button>
+                <View style={styles.btn_break}/>
+                <Button 
+                            onPress={() => navigation.navigate('Transcripts')}
+                            toStyle={styles.regBtn}
+                            textStyle={styles.regText}
+                        >
+                       Register
+                </Button>
+               </View>
+                
             </View>
+           
+                    
+                
         </View>
     );
 }
@@ -97,6 +160,15 @@ const styles = StyleSheet.create({
         marginLeft: '1%',
         marginTop: '0.5%',
     },
+   /* TextInput: {
+        height: 50,
+        //flex: 3,
+        padding: 10,
+        fontSize: 25,
+        marginBottom: 20,
+        paddingLeft: 30,
+        backgroundColor:'#fff',
+    },*/
     TextInput: {
         width: 300,
         height: 40,
@@ -105,19 +177,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderColor: '#04a4f4',
         borderWidth: 1,
-        borderRadius: 50,
+        borderRadius: 15, 
         fontSize: 20,
     },
     inputView: {
         backgroundColor:'#04a4f4',
+       // flex: 2,
         paddingRight: 30,
         paddingLeft: 30,
         paddingVertical: 10,
         paddingHorizontal: 15,
         justifyContent: 'center',
         borderWidth: 1,
-        borderRadius: 50, 
+        borderRadius: 15, 
         borderColor: '#04a4f4',
+        //marginLeft: 20,
     },
     highlight: {
         fontSize: 22,
@@ -135,18 +209,23 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     loginBtn: {
+       
+       // flex: 2,
         paddingRight: 30,
         paddingLeft: 30,
         paddingVertical: 10,
-        paddingHorizontal:15,
+        paddingHorizontal: 15,
         justifyContent: 'center',
         borderWidth: 2,
         backgroundColor: '#04a4f4',
         borderColor: '#04a4f4',
+        //padding: 10,
         borderRadius: 50,
-        width: '18%',
+        //marginLeft: 20,
     },
     regBtn: {
+       
+        // flex: 2,
          paddingRight: 30,
          paddingLeft: 30,
          paddingVertical: 10,
@@ -155,19 +234,26 @@ const styles = StyleSheet.create({
          borderWidth: 2,
          backgroundColor: '#fff',
          borderColor: '#04a4f4',
+         //padding: 10,
          borderRadius: 50,
-         width: '18%',
+         //marginLeft: 20,
      },
     break: {
         height: '3%',
+        
     },
     btn_break: {
         width: '5%',
+        
     },
     right_screen: {
+        //width: '49.8%',
+       // height: '94%',
         alignSelf: 'center',
+       // keyboardDismissMode: 'none',
         fontSize:32,
         flexDirection: 'row',
+       // color: '#fff', 
     },
     textbox: {
         flexDirection: 'row',

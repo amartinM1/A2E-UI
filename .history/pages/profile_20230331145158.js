@@ -14,7 +14,6 @@ import{
     FlatList,
 } from 'react-native';
 
-export const username = "test";
 export const current_transcript = "test log";
 
 // Button Object
@@ -43,7 +42,7 @@ function Profile({navigation}) {
                         style={styles.TextInput}
                         placeholder="Username"
                         placeholderTextColor="#d3d3d3"
-                        onChangeText={(value) => dispatch(setUser(value))}
+                        onChangeText={(name) => dispatch(setUser(name))}
                     /> 
                 </View>
             
