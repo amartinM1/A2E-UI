@@ -1,0 +1,194 @@
+import React, {Component,useEffect, useState} from 'react';
+import database from '@react-native-firebase/database';
+import { MyProvider } from '../components/myContext.js';
+import MyComponent from '../components/myComponent.js';
+import {useSelector, useDispatch} from 'react-redux';
+import {setUser, setTranscript} from '../redux/action';
+import{
+    Text,
+    View,
+    StyleSheet,
+    TouchableOpacity, 
+    TextInput,
+    ScrollView,
+    FlatList,
+} from 'react-native';
+
+export const current_transcript = "test log";
+
+// Button Object
+function Button({onPress, children, toStyle, textStyle}) {
+    return (
+        <TouchableOpacity onPress={onPress} style={toStyle}>
+            <Text style={textStyle}>{children}</Text>
+        </TouchableOpacity>
+    ); 
+}
+
+function Profile({navigation}) {
+
+    const { name, transcript } = useSelector(state => state.userReducer); 
+    const dispatch = useDispatch();
+    
+    return (
+        <View style={styles.container}>
+            <View style={styles.background_container}>
+                <Text style={styles.logo}>A2E</Text>
+            </View>
+
+            <View style={styles.main_container}>
+                <View style={styles.inputView}>
+                    <TextInput
+                        style={styles.TextInput}
+                        placeholder="Username"
+                        placeholderTextColor="#d3d3d3"
+                        onChangeText={(name) => dispatch(setUser(name))}
+                    /> 
+                </View>
+            
+                <View style={styles.break}/>
+
+                <View style={styles.right_screen}>
+                    <Button 
+                        onPress={() => navigation.navigate('Transcripts')}
+                        toStyle={styles.loginBtn}
+                        textStyle={styles.loginText}
+                    >
+                        Login
+                    </Button>
+                    <View style={styles.btn_break}/>
+                    <Button 
+                        onPress={() => navigation.navigate('Transcripts')}
+                        toStyle={styles.regBtn}
+                        textStyle={styles.regText}
+                    >
+                        Register
+                    </Button>
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    background_container: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#F5F5F5',
+    },
+    main_container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    logo: {
+        fontSize: 45,
+        fontWeight: 'bold',
+        color: '#04a4f4',
+        textAlign: 'left',
+        marginLeft: '1%',
+        marginTop: '0.5%',
+    },
+    TextInput: {
+        width: 300,
+        height: 40,
+        backgroundColor: '#fff',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderColor: '#04a4f4',
+        borderWidth: 1,
+        borderRadius: 50,
+        fontSize: 20,
+    },
+    inputView: {
+        backgroundColor:'#04a4f4',
+        paddingRight: 30,
+        paddingLeft: 30,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 50, 
+        borderColor: '#04a4f4',
+    },
+    highlight: {
+        fontSize: 22,
+        fontWeight: '700',
+        textAlign: 'center',
+    },
+    loginText: {
+        fontSize: 22,
+        color: '#fff', 
+        textAlign: 'center',
+    },
+    regText: {
+        fontSize: 22,
+        color: '#04a4f4', 
+        textAlign: 'center',
+    },
+    loginBtn: {
+        paddingRight: 30,
+        paddingLeft: 30,
+        paddingVertical: 10,
+        paddingHorizontal:15,
+        justifyContent: 'center',
+        borderWidth: 2,
+        backgroundColor: '#04a4f4',
+        borderColor: '#04a4f4',
+        borderRadius: 50,
+        width: '18%',
+    },
+    regBtn: {
+         paddingRight: 30,
+         paddingLeft: 30,
+         paddingVertical: 10,
+         paddingHorizontal: 15,
+         justifyContent: 'center',
+         borderWidth: 2,
+         backgroundColor: '#fff',
+         borderColor: '#04a4f4',
+         borderRadius: 50,
+         width: '18%',
+     },
+    break: {
+        height: '3%',
+    },
+    btn_break: {
+        width: '5%',
+    },
+    right_screen: {
+        alignSelf: 'center',
+        fontSize:32,
+        flexDirection: 'row',
+    },
+    textbox: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: '2%',
+    },
+    text: {
+        fontSize: 22,
+        textAlign: 'left',
+        width: '70%',
+        paddingRight: '2.5%',
+    },
+    highlight: {
+        fontSize: 22,
+        fontWeight: '700',
+        textAlign: 'center',
+    },
+    edit_text: {
+        width: '27.5%',
+        paddingLeft: '2.5%',
+        paddingRight: '2.5%',
+    },
+});
+
+export default Profile;

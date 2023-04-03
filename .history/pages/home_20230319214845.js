@@ -1,19 +1,16 @@
-import React, {Component, useEffect, useState, useRef, useCallback, useReducer, useMemo} from 'react';
+import React, {Component, useEffect, useState, useRef} from 'react';
 import ReactDOM from 'react-dom';
 import database from '@react-native-firebase/database';
 import * as User from './profile';
 import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
 import {decode, encode} from 'base-64'
-import events from "events"
-import zlib from 'react-zlib-js';
-import FastImage from 'react-native-fast-image'
-import ImageView from 'react-native-image-view';
-import Video from 'react-native-video';
-// import Speech_Text from './speech';
-import Voice from '@react-native-voice/voice';
-
-import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
+/*if (!global.btoa) {
+    global.btoa = encode;
+}
+if (!global.atob) {
+    global.atob = decode;
+}*/
 
 import {
     Text,
@@ -29,7 +26,25 @@ import {
     EventEmitter,
 } from 'react-native';
 
-events.EventEmitter.defaultMaxListeners = 100
+// Video Object
+/*function Frames({msg}) {
+   /* return (
+        <Image 
+            style={styles.image} 
+            source={{uri: `data:image/png;base64,${msg}`}}
+        />
+    ); 
+    let url = msg;
+    if (msg.indexOf("data:image/png;base64,") > -1) {
+      let decodedPng = base64.decode(
+        msg.replace("data:image/png;base64,", "")
+      );
+      let blob = new Blob([decodedPng], { type: "image/png+xml" });
+      url = URL.createObjectURL(blob);
+    }
+    return (<img src={url}/>);    
+}*/
+
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -41,24 +56,19 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 
-function StartCamera({udp}) {
+function StartCamera({Frame}) {
+    // display frame
+    var image = 'data:image/jpg;base64,'+Frame;
+    console.log(image)
 
     return (
-
-        <View style={{ flex: 1,
-                                         justifyContent: 'center',
-                                         alignItems: 'center',
-                                         padding:25}}>
-        <VLCPlayer
-                source={{ uri: "http://10.136.58.3:5000/video_feed" }}
-                style={[styles.Ilogo]}
-                paused={false}
-                autoAspectRatio={true}
-                resizeMode={"fill"}
+        <View style={styles.Icontainer}>
+           <Image
+                style={styles.Ilogo}
+                source= {{uri: 'data:image/jpg;base64,'+Frame}}
             />
-
-        </View>
-      );
+       </View>
+    );
 }
 
 // async and await make function wait to finish read before returning
@@ -93,17 +103,12 @@ async function GetMessages() {
             snapshot.forEach((child) => {
                 var message = {};
                 message['time'] = child.key;
-                console.log(child.val()['usr']);
-
-                message['msg'] = child.val()['msg'];
-                message['usr'] = child.val()['usr'];
+                message['msg'] = child.val();
                 messages.push(message);
-
             })
             var message = {};
             message['time'] = '+';
             message['msg'] = "add message";
-            message['usr'] = "asl";
             messages.push(message);
         });
     //console.log(messages);
@@ -112,9 +117,9 @@ async function GetMessages() {
 
 async function EditMessage(message) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
         .update({
-            ['msg'] : message.msg,
+            [message.time] : message.msg,
         })
         .then(() => console.log(`updated message at: ${message.time}`));
     return;
@@ -128,9 +133,8 @@ async function DeleteMessage(message) {
     return;
 }
 
-async function ReceiveData(data, usr, reload) {
-    var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
+async function ReceiveData(data, reload) {
+    var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
     EditMessage(message);
@@ -158,7 +162,6 @@ function TextBox({message, reload}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message);
@@ -217,12 +220,9 @@ function Home({navigation}) {
     const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
+    const [frame, setFrame] = useState([]);
     const [shouldShow, setShouldShow] = useState(false);
-    const [speechResult, setSpeechResult] = useState('');
-    const [loadingSpeech, setLoadingSpeech] = useState(false);
-    const [speechButton, setSpeechButton] = useState('Start Text to Speech');
-    const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
-    const socket = 1;
+    const [getFrame, setGetFrame] = useState(true);
 
     tcp_server.on('error', (error) => {
         console.log('An error ocurred with the server', error);
@@ -231,8 +231,20 @@ function Home({navigation}) {
     tcp_server.on('close', () => {
         console.log('Server closed connection');
     });
-    console.log("home was ran")
 
+    udp_socket.on('message', async function(msg, rinfo) {
+//        if(getFrame) {
+//            setFrame(encode(String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"]))));
+//            await setGetFrame(false);
+//        }
+//        else {
+//            setTimeout(() => {
+//                setGetFrame(true);
+//            }, 1000);
+//        }
+        setFrame(String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"])));
+        console.log('got a UDP message!!',String.fromCharCode.apply(null, new Uint8Array(JSON.parse(JSON.stringify(msg))["data"])));
+    });
 
     udp_socket.on('error', (error) => {
         console.log('An error occured with the UDP Socket');
@@ -246,7 +258,7 @@ function Home({navigation}) {
         }
 
         udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.255.136', function(err) {
+            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.63.60', function(err) {
                 if (err) throw err
                 console.log('Message sent!')
             })
@@ -266,11 +278,9 @@ function Home({navigation}) {
         if(!tcp_connected) {
             const server = TcpSocket.createServer(function(tcp_socket) {
                 tcp_socket.on('data', (data) => {
-                    // if notspeaking
-                    // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(String(data), fetchData);
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -285,83 +295,6 @@ function Home({navigation}) {
             setTCPServer(server);
             setTCPConnected(true);
         }
-
-    }, []);
-
-    const speechStartHandler = e => {
-        console.log('speechStart successful', e);
-    };
-    
-    const speechEndHandler = e => {
-        setLoadingSpeech(false);
-        console.log('stop handler', e);
-    };
-    
-    const speechResultsHandler = e => {
-        const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
-        setSpeechResult(text);
-    };
-    
-    const startRecording = async () => {
-        setLoadingSpeech(true);
-        try {
-            await Voice.start('en-Us');
-        }
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const stopRecording = async () => {
-        try {
-            await Voice.stop();
-            setLoadingSpeech(false);
-        } 
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const toggleSpeechButtons = () => {
-        if(speechButton == "Start Text to Speech") {
-            startRecording()
-            setSpeechButton('Stop Text to Speech');
-        }
-        else if (speechButton == "Stop Text to Speech") {
-            stopRecording()
-            setSpeechButton('Start Text to Speech');
-        }
-    };
-//use state for dynamically creating speech fiiedl when the speechresult is handled
-    const [val, setVal] = useState([]); //this is esssentially the speechresult use state 
-    const handleAdd =()=> {
-        const speech_msg = [...val,[]]
-        setVal(abc)
-    }
-
-    const handleChange=(onChangeValue,i)=>{
-        const inputdata=[...val]
-        inputdata[i]=onChangeValue.target.value;
-        setVal(inputdata)
-       }
-
-    const togglePredictionButtons = () => {
-        if(predictionsButton == "Start Predictions") {
-            setPredictionsButton('Stop Predictions');
-        }
-        else if (predictionsButton == "Stop Predictions") {
-            setPredictionsButton('Start Predictions');
-        }
-    };
-
-    useEffect(() => {
-        Voice.onSpeechStart = speechStartHandler;
-        Voice.onSpeechEnd = speechEndHandler;
-        Voice.onSpeechResults = speechResultsHandler;
-        return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
     }, []);
 
     const renderItem = ({item}) => (
@@ -370,6 +303,7 @@ function Home({navigation}) {
             reload={() => fetchData()}
         />
     );
+
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -390,65 +324,25 @@ function Home({navigation}) {
                 >
                     Settings
                 </Button>
-
-                {/* <Button 
-                    onPress={() => navigation.navigate('Speech_Text')}
-                    toStyle={styles.settings}
-                    textStyle={styles.settings_text}
-                >
-                    Speech
-                </Button> */}
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Button 
                         onPress={() => setShouldShow(!shouldShow)}
                         toStyle={styles.button}
-                        textStyle={styles.button_text}>
+                        textStyle={styles.button_text}
+                    >
                         Start Camera
                     </Button>
                     {shouldShow ?
-                        (
+                            (
                             <StartCamera
-                                udp={udp_socket}
+                                Frame={frame}
                             />
-                        ) : null}
+                            ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
                 
-                <View style={styles.right_screen}>
-                    <View style={styles.double_buttons}>
-
-                        <TouchableOpacity onPress={togglePredictionButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{predictionsButton}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={toggleSpeechButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{speechButton}</Text>
-                        </TouchableOpacity>
-                        
-                    </View>
-                    
-                    <View style={styles.textInputStyle}>
-                        <TextInput
-                            value={speechResult}
-                            multiline={true}
-                            placeholder= "say something!"
-                            style={{
-                                flex: 1,
-                                height: 50,
-                            }}
-                            onChangeText={text => setSpeechResult(text)}
-                        />
-                    </View>
-
-                    <FlatList style={styles.messages}
-                        data={messages}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.time}
-                        removeClippedSubviews={false}
-                    />
-                </View>
             </View>
         </View>
     );
@@ -522,11 +416,7 @@ const styles = StyleSheet.create({
     right_screen: {
         width: '49.8%',
         height: '94%',
-        keyboardDismissMode: 'none', 
-    },
-    messages: {
-        width: '100%',
-        height: '94%',
+        alignSelf: 'center',
         keyboardDismissMode: 'none', 
     },
     verticle_line:{
@@ -544,7 +434,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 50,
         width: '50%',
-        marginTop: '5%',
+        marginTop: '10%',
     },
     button_text:{
         marginBottom: 2,
@@ -552,44 +442,6 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: '600',
         color: '#FFFFFF',
-    },
-    double_buttons:{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: '3%',
-        marginBottom: 10,
-    },
-    buttons_2:{
-        backgroundColor: '#04a4f4',
-        padding: 10,
-        borderRadius: 50,
-        marginHorizontal: 10,
-        width: '45%',
-        backgroundColor: '#04a4f4',
-    },
-    text_2:{
-        textAlign: 'center',
-        marginBottom: 2,
-        marginTop: 2,
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
-    textInputStyle: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        height:100,
-        borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        shadowOffset: {width: 0, height: 1},
-        shadowRadius: 2,
-        elevation: 2,
-        shadowOpacity: 0.4,
-        color: '#000',
     },
     body: {
         fontSize: 20,
@@ -634,14 +486,16 @@ const styles = StyleSheet.create({
         
     },
     Icontainer: {
-        padding: 20,
+        paddingTop: 50,
+      },
+      ItinyLogo: {
+        width: 50,
+        height: 50,
       },
       Ilogo: {
-        alignSelf: 'center',
-        width: '100%',
-        height: '100%',
+        width: 66,
+        height: 58,
       },
-
 })
 
 export default Home;

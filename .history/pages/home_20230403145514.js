@@ -93,17 +93,14 @@ async function GetMessages() {
             snapshot.forEach((child) => {
                 var message = {};
                 message['time'] = child.key;
-                console.log(child.val()['usr']);
-
+                console.log(child.val()['msg']);
                 message['msg'] = child.val()['msg'];
                 message['usr'] = child.val()['usr'];
                 messages.push(message);
-
             })
             var message = {};
             message['time'] = '+';
             message['msg'] = "add message";
-            message['usr'] = "asl";
             messages.push(message);
         });
     //console.log(messages);
@@ -112,9 +109,9 @@ async function GetMessages() {
 
 async function EditMessage(message) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
         .update({
-            ['msg'] : message.msg,
+            [message.time] : message.msg,
         })
         .then(() => console.log(`updated message at: ${message.time}`));
     return;
@@ -128,9 +125,8 @@ async function DeleteMessage(message) {
     return;
 }
 
-async function ReceiveData(data, usr, reload) {
-    var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
+async function ReceiveData(data, reload) {
+    var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
     EditMessage(message);
@@ -158,7 +154,6 @@ function TextBox({message, reload}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message);
@@ -270,7 +265,7 @@ function Home({navigation}) {
                     // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(String(data), fetchData);
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -299,7 +294,6 @@ function Home({navigation}) {
     
     const speechResultsHandler = e => {
         const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
         setSpeechResult(text);
     };
     

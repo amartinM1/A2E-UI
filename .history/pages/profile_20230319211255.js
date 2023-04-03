@@ -1,14 +1,16 @@
-import React, {Component, useState} from 'react';
+import React, {Component,useEffect, useState} from 'react';
+import database from '@react-native-firebase/database';
 import {
     Text,
     View,
     StyleSheet,
     TouchableOpacity, 
-    TextInput
+    TextInput,
+    FlatList,
 } from 'react-native';
 
-export const username = "test";
-export const current_transcript = "test log";
+export const username = "admin";
+export const current_transcript = "example log";
 
 
 // Button Object
@@ -21,8 +23,59 @@ function Button({onPress, children, toStyle, textStyle}) {
 }
 
 
+async function GetMessages() {
+    var messages = [];
+    /*const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/${userId}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            console.log(snapshot.val());
+          } else {
+            console.log("No data available");
+          }
+        }).catch((error) => {
+          console.error(error);
+    });*/
+    await database()
+        //.ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
+        .ref(`/users/${username}/transcripts/${current_transcript}/messages`)
+        .once("value") 
+        .then((snapshot) => {
+            snapshot.forEach((child) => {
+                var message = {};
+               message['time'] = child.key;
+               console.log(child.val());
+               message['msg'] = child.val();
+               // messages.push(message);
+            })
+        
+        });
+    //console.log(messages);
+    return messages;
+}
+
+
+
 function Profile({navigation}) {
     const [email, setEmail] = useState('username');
+    const [messages, setMessages] = useState([{msg: "Loading...", time: ""}]);
+
+    const fetchData = async () => {
+        const data = await GetMessages();
+        //setMessages(data);
+    };
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
+    
+    const renderItem = ({item}) => (
+        <Text
+            message={item} 
+            reload={() => fetchData()}
+        />
+    );
+
+    
     return (
         <View style={styles.container}>
             <View style={styles.background_container}>
@@ -40,14 +93,20 @@ function Profile({navigation}) {
                 </View>
             
                 <View style={styles.break}/>
-        <Button 
+                <Button 
                             onPress={() => navigation.navigate('Home')}
                             toStyle={styles.loginBtn}
                             textStyle={styles.loginText}
                         >
                        LOGIN
                 </Button>
-
+         
+                <FlatList style={styles.right_screen}
+                data={messages}
+                renderItem={renderItem}
+                keyExtractor={item => item.time}
+                removeClippedSubviews={false}
+                />
             </View>
         </View>
     );
@@ -138,6 +197,12 @@ const styles = StyleSheet.create({
     break: {
         height: '3%',
         
+    },
+    right_screen: {
+        width: '49.8%',
+        height: '94%',
+        alignSelf: 'center',
+        keyboardDismissMode: 'none', 
     },
 });
 

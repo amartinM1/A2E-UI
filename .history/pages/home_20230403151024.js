@@ -130,9 +130,9 @@ async function DeleteMessage(message) {
 
 async function ReceiveData(data, usr, reload) {
     var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
     message.msg = data;
     message.time = await getTime();
+    message.usr = usr;
     EditMessage(message);
     reload();
 }
@@ -158,7 +158,6 @@ function TextBox({message, reload}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message);
@@ -270,7 +269,7 @@ function Home({navigation}) {
                     // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(String(data), fetchData);
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -299,7 +298,6 @@ function Home({navigation}) {
     
     const speechResultsHandler = e => {
         const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
         setSpeechResult(text);
     };
     

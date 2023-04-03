@@ -158,7 +158,6 @@ function TextBox({message, reload}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message);

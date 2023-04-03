@@ -10,8 +10,6 @@ import zlib from 'react-zlib-js';
 import FastImage from 'react-native-fast-image'
 import ImageView from 'react-native-image-view';
 import Video from 'react-native-video';
-// import Speech_Text from './speech';
-import Voice from '@react-native-voice/voice';
 
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
 
@@ -43,7 +41,7 @@ function Button({onPress, children, toStyle, textStyle}) {
 
 function StartCamera({udp}) {
 
-    return (
+      return (
 
         <View style={{ flex: 1,
                                          justifyContent: 'center',
@@ -93,17 +91,12 @@ async function GetMessages() {
             snapshot.forEach((child) => {
                 var message = {};
                 message['time'] = child.key;
-                console.log(child.val()['usr']);
-
-                message['msg'] = child.val()['msg'];
-                message['usr'] = child.val()['usr'];
+                message['msg'] = child.val();
                 messages.push(message);
-
             })
             var message = {};
             message['time'] = '+';
             message['msg'] = "add message";
-            message['usr'] = "asl";
             messages.push(message);
         });
     //console.log(messages);
@@ -112,9 +105,9 @@ async function GetMessages() {
 
 async function EditMessage(message) {
     await database()
-        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages/${message.time}`)
+        .ref(`/users/${User.username}/transcripts/${User.current_transcript}/messages`)
         .update({
-            ['msg'] : message.msg,
+            [message.time] : message.msg,
         })
         .then(() => console.log(`updated message at: ${message.time}`));
     return;
@@ -128,9 +121,8 @@ async function DeleteMessage(message) {
     return;
 }
 
-async function ReceiveData(data, usr, reload) {
-    var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
+async function ReceiveData(data, reload) {
+    var message = {msg: "", time: ""};
     message.msg = data;
     message.time = await getTime();
     EditMessage(message);
@@ -158,7 +150,6 @@ function TextBox({message, reload}) {
             if(message.time == '+') {
                 if(message.msg != "add message") {
                     setColor('black');
-                    message.usr = "asl";
                     message.time = await getTime();
                     if(message.msg.length == 0) {
                         DeleteMessage(message);
@@ -218,10 +209,6 @@ function Home({navigation}) {
     const [tcp_connected, setTCPConnected] = useState(false);
     const [udp_connected, setUDPConnected] = useState(false);
     const [shouldShow, setShouldShow] = useState(false);
-    const [speechResult, setSpeechResult] = useState('');
-    const [loadingSpeech, setLoadingSpeech] = useState(false);
-    const [speechButton, setSpeechButton] = useState('Start Text to Speech');
-    const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
     const socket = 1;
 
     tcp_server.on('error', (error) => {
@@ -251,6 +238,7 @@ function Home({navigation}) {
                 console.log('Message sent!')
             })
         });
+
     });
 
     const fetchData = async () => {
@@ -266,11 +254,9 @@ function Home({navigation}) {
         if(!tcp_connected) {
             const server = TcpSocket.createServer(function(tcp_socket) {
                 tcp_socket.on('data', (data) => {
-                    // if notspeaking
-                    // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(String(data), fetchData);
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -285,83 +271,6 @@ function Home({navigation}) {
             setTCPServer(server);
             setTCPConnected(true);
         }
-
-    }, []);
-
-    const speechStartHandler = e => {
-        console.log('speechStart successful', e);
-    };
-    
-    const speechEndHandler = e => {
-        setLoadingSpeech(false);
-        console.log('stop handler', e);
-    };
-    
-    const speechResultsHandler = e => {
-        const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
-        setSpeechResult(text);
-    };
-    
-    const startRecording = async () => {
-        setLoadingSpeech(true);
-        try {
-            await Voice.start('en-Us');
-        }
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const stopRecording = async () => {
-        try {
-            await Voice.stop();
-            setLoadingSpeech(false);
-        } 
-        catch (error) {
-            console.log('error', error);
-        }
-    };
-    
-    const toggleSpeechButtons = () => {
-        if(speechButton == "Start Text to Speech") {
-            startRecording()
-            setSpeechButton('Stop Text to Speech');
-        }
-        else if (speechButton == "Stop Text to Speech") {
-            stopRecording()
-            setSpeechButton('Start Text to Speech');
-        }
-    };
-//use state for dynamically creating speech fiiedl when the speechresult is handled
-    const [val, setVal] = useState([]); //this is esssentially the speechresult use state 
-    const handleAdd =()=> {
-        const speech_msg = [...val,[]]
-        setVal(abc)
-    }
-
-    const handleChange=(onChangeValue,i)=>{
-        const inputdata=[...val]
-        inputdata[i]=onChangeValue.target.value;
-        setVal(inputdata)
-       }
-
-    const togglePredictionButtons = () => {
-        if(predictionsButton == "Start Predictions") {
-            setPredictionsButton('Stop Predictions');
-        }
-        else if (predictionsButton == "Stop Predictions") {
-            setPredictionsButton('Start Predictions');
-        }
-    };
-
-    useEffect(() => {
-        Voice.onSpeechStart = speechStartHandler;
-        Voice.onSpeechEnd = speechEndHandler;
-        Voice.onSpeechResults = speechResultsHandler;
-        return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
     }, []);
 
     const renderItem = ({item}) => (
@@ -390,65 +299,30 @@ function Home({navigation}) {
                 >
                     Settings
                 </Button>
-
-                {/* <Button 
-                    onPress={() => navigation.navigate('Speech_Text')}
-                    toStyle={styles.settings}
-                    textStyle={styles.settings_text}
-                >
-                    Speech
-                </Button> */}
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
                     <Button 
                         onPress={() => setShouldShow(!shouldShow)}
                         toStyle={styles.button}
-                        textStyle={styles.button_text}>
+                        textStyle={styles.button_text}
+                    >
                         Start Camera
                     </Button>
                     {shouldShow ?
-                        (
-                            <StartCamera
-                                udp={udp_socket}
-                            />
-                        ) : null}
+                            (
+                                <StartCamera
+                                    udp={udp_socket}
+                                />
+                            ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
-                
-                <View style={styles.right_screen}>
-                    <View style={styles.double_buttons}>
-
-                        <TouchableOpacity onPress={togglePredictionButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{predictionsButton}</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={toggleSpeechButtons} style={styles.buttons_2}>
-                            <Text style={styles.text_2}>{speechButton}</Text>
-                        </TouchableOpacity>
-                        
-                    </View>
-                    
-                    <View style={styles.textInputStyle}>
-                        <TextInput
-                            value={speechResult}
-                            multiline={true}
-                            placeholder= "say something!"
-                            style={{
-                                flex: 1,
-                                height: 50,
-                            }}
-                            onChangeText={text => setSpeechResult(text)}
-                        />
-                    </View>
-
-                    <FlatList style={styles.messages}
-                        data={messages}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.time}
-                        removeClippedSubviews={false}
-                    />
-                </View>
+                <FlatList style={styles.right_screen}
+                    data={messages}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.time}
+                    removeClippedSubviews={false}
+                />
             </View>
         </View>
     );
@@ -522,11 +396,7 @@ const styles = StyleSheet.create({
     right_screen: {
         width: '49.8%',
         height: '94%',
-        keyboardDismissMode: 'none', 
-    },
-    messages: {
-        width: '100%',
-        height: '94%',
+        alignSelf: 'center',
         keyboardDismissMode: 'none', 
     },
     verticle_line:{
@@ -552,44 +422,6 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: '600',
         color: '#FFFFFF',
-    },
-    double_buttons:{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: '3%',
-        marginBottom: 10,
-    },
-    buttons_2:{
-        backgroundColor: '#04a4f4',
-        padding: 10,
-        borderRadius: 50,
-        marginHorizontal: 10,
-        width: '45%',
-        backgroundColor: '#04a4f4',
-    },
-    text_2:{
-        textAlign: 'center',
-        marginBottom: 2,
-        marginTop: 2,
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
-    textInputStyle: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        height:100,
-        borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        shadowOffset: {width: 0, height: 1},
-        shadowRadius: 2,
-        elevation: 2,
-        shadowOpacity: 0.4,
-        color: '#000',
     },
     body: {
         fontSize: 20,
