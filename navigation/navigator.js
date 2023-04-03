@@ -7,7 +7,9 @@ import Launch from '../pages/launch';
 import Home from '../pages/home';
 import Profile from '../pages/profile';
 import Settings from '../pages/settings';
+import Speech_Text from '../pages/speech';
 import Transcripts from '../pages/transcripts';
+
 //stacks
 const LaunchStack = createNativeStackNavigator();
 

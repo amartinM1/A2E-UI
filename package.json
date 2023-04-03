@@ -14,6 +14,7 @@
   "dependencies": {
     "@react-native-firebase/app": "^16.5.0",
     "@react-native-firebase/database": "^16.5.0",
+    "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/native": "^6.0.13",
     "@react-navigation/native-stack": "^6.9.1",
     "base-64": "^1.0.0",
