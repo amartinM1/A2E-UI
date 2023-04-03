@@ -434,7 +434,18 @@ function Home({navigation}) {
                         
                     </View>
                     
-        
+                    <View style={styles.textInputStyle}>
+                        <TextInput
+                            value={speechResult}
+                            multiline={true}
+                            placeholder= "say something!"
+                            style={{
+                                flex: 1,
+                                height: 50,
+                            }}
+                            onChangeText={text => setSpeechResult(text)}
+                        />
+                    </View>
 
                     <FlatList style={styles.messages}
                         data={messages}

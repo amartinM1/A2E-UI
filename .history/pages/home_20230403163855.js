@@ -434,7 +434,9 @@ function Home({navigation}) {
                         
                     </View>
                     
-        
+                    <View style={styles.textInputStyle}>
+                        
+                    </View>
 
                     <FlatList style={styles.messages}
                         data={messages}

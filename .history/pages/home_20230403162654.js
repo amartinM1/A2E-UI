@@ -145,9 +145,6 @@ function TextBox({message, reload}) {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
         }
-        else if(message.usr == "voice"  && !canEdit){
-            setColor('#039BE5');
-        }
     });
     async function toggle() {
         if(!canEdit) {
@@ -175,7 +172,15 @@ function TextBox({message, reload}) {
                     setColor('#04a4f4');
                 }
             }
-    
+            else if(message.usr == "voice"){
+                setColor('#039BE5');
+                if(message.msg.length == 0) {
+                    DeleteMessage(message);
+                }
+                else {
+                    EditMessage(message);
+                }
+            }
             else {
                 setColor('black');
                 if(message.msg.length == 0) {
@@ -434,7 +439,18 @@ function Home({navigation}) {
                         
                     </View>
                     
-        
+                    <View style={styles.textInputStyle}>
+                        <TextInput
+                            value={speechResult}
+                            multiline={true}
+                            placeholder= "say something!"
+                            style={{
+                                flex: 1,
+                                height: 50,
+                            }}
+                            onChangeText={text => setSpeechResult(text)}
+                        />
+                    </View>
 
                     <FlatList style={styles.messages}
                         data={messages}
