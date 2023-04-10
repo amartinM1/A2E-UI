@@ -1,5 +1,7 @@
 import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
+import useCollapse from 'react-collapsed';
+import './components/app.css';
 import {useSelector, useDispatch} from 'react-redux';
 import {
     Text,
@@ -18,6 +20,23 @@ function Button({onPress, children, toStyle, textStyle}) {
             <Text style={textStyle}>{children}</Text>
         </TouchableOpacity>
     ); 
+}
+
+function Collapsible() {
+    const { getCollapseProps, getToggleProps, isExpanded } = useCollapse();
+return (
+    <div className="collapsible">
+        <div className="header" {...getToggleProps()}>
+            {isExpanded ? 'Collapse' : 'Expand'}
+        </div>
+        <div {...getCollapseProps()}>
+            <div className="content">
+                Transcript <br/><br/>
+                Click again to hide...
+            </div>
+        </div>
+    </div>
+    );
 }
 
 async function getTime() {
@@ -194,6 +213,7 @@ function Transcripts({navigation}) {
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
+            <Collapsible/>
              <FlatList style={styles.right_screen}
                     data={messages}
                     renderItem={renderItem}
