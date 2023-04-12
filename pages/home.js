@@ -27,10 +27,7 @@ import {
     FlatList,
     Image,
     EventEmitter,
-    SafeAreaView
 } from 'react-native';
-
-import { WebView } from 'react-native-webview'
 
 events.EventEmitter.defaultMaxListeners = 100
 
@@ -48,16 +45,19 @@ function StartCamera({udp}) {
 
     return (
 
-        // <View style={{ flex: 1,
-        //     justifyContent: 'center',
-        //     alignItems: 'center',
-        //     padding:25}}>
+        <View style={{ flex: 1,
+                                         justifyContent: 'center',
+                                         alignItems: 'center',
+                                         padding:25}}>
+        <VLCPlayer
+                source={{ uri: "http://10.136.58.3:5000/video_feed" }}
+                style={[styles.Ilogo]}
+                paused={false}
+                autoAspectRatio={true}
+                resizeMode={"fill"}
+            />
 
-        <WebView
-            source={{ uri: 'http://10.192.232.224:5000/video_feed' }}
-            style={styles.webView}
-        />
-        // </View>
+        </View>
       );
 }
 
@@ -214,7 +214,7 @@ function Home({navigation}) {
     const [speechResult, setSpeechResult] = useState('');
     const [loadingSpeech, setLoadingSpeech] = useState(false);
     const [speechButton, setSpeechButton] = useState('Start Text to Speech');
-    const [predictionsButton, setPredictionsButton] = useState('Start ASL Predictions');
+    const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
     const socket = 1;
 
     tcp_server.on('error', (error) => {
@@ -225,6 +225,7 @@ function Home({navigation}) {
         console.log('Server closed connection');
     });
     console.log("home was ran")
+
 
     udp_socket.on('error', (error) => {
         console.log('An error occured with the UDP Socket');
@@ -280,16 +281,16 @@ function Home({navigation}) {
     }, []);
 
     const speechStartHandler = e => {
-        console.log('speech start successful', e);
+        console.log('speechStart successful', e);
     };
     
     const speechEndHandler = e => {
+        setLoadingSpeech(false);
         console.log('stop handler', e);
     };
     
     const speechResultsHandler = e => {
         const text = e.value[0];
-        console.log(e);
         setSpeechResult(text);
     };
     
@@ -297,7 +298,6 @@ function Home({navigation}) {
         setLoadingSpeech(true);
         try {
             await Voice.start('en-Us');
-            console.log("voice started");
         }
         catch (error) {
             console.log('error', error);
@@ -307,7 +307,6 @@ function Home({navigation}) {
     const stopRecording = async () => {
         try {
             await Voice.stop();
-            console.log("voice ended");
             setLoadingSpeech(false);
         } 
         catch (error) {
@@ -315,8 +314,26 @@ function Home({navigation}) {
         }
     };
     
+    const toggleSpeechButtons = () => {
+        if(speechButton == "Start Text to Speech") {
+            startRecording()
+            setSpeechButton('Stop Text to Speech');
+        }
+        else if (speechButton == "Stop Text to Speech") {
+            stopRecording()
+            setSpeechButton('Start Text to Speech');
+        }
+    };
+    const togglePredictionButtons = () => {
+        if(predictionsButton == "Start Predictions") {
+            setPredictionsButton('Stop Predictions');
+        }
+        else if (predictionsButton == "Stop Predictions") {
+            setPredictionsButton('Start Predictions');
+        }
+    };
+
     useEffect(() => {
-        console.log("use effect speech");
         Voice.onSpeechStart = speechStartHandler;
         Voice.onSpeechEnd = speechEndHandler;
         Voice.onSpeechResults = speechResultsHandler;
@@ -324,25 +341,6 @@ function Home({navigation}) {
             Voice.destroy().then(Voice.removeAllListeners);
         };
     }, []);
-    
-    const toggleSpeechButtons = () => {
-        if(speechButton == "Start Text to Speech") {
-            setSpeechButton("Stop Text to Speech");
-            startRecording()
-        }
-        else if (speechButton == "Stop Text to Speech") {
-            stopRecording()
-            setSpeechButton("Start Text to Speech");
-        }
-    };
-    const togglePredictionButtons = () => {
-        if(predictionsButton == "Start ASL Predictions") {
-            setPredictionsButton("Stop ASL Predictions");
-        }
-        else if (predictionsButton == "Stop ASL Predictions") {
-            setPredictionsButton("Start ASL Predictions");
-        }
-    };
 
     const renderItem = ({item}) => (
         <TextBox 
@@ -366,10 +364,18 @@ function Home({navigation}) {
                 <Button 
                     onPress={() => navigation.navigate('Settings')}
                     toStyle={styles.settings}
-                    textStyle={styles.settings_text}>
+                    textStyle={styles.settings_text}
+                >
                     Settings
                 </Button>
 
+                {/* <Button 
+                    onPress={() => navigation.navigate('Speech_Text')}
+                    toStyle={styles.settings}
+                    textStyle={styles.settings_text}
+                >
+                    Speech
+                </Button> */}
             </View>
             <View style={styles.main_container}>
                 <View style={styles.left_screen}>
@@ -377,7 +383,7 @@ function Home({navigation}) {
                         onPress={() => setShouldShow(!shouldShow)}
                         toStyle={styles.button}
                         textStyle={styles.button_text}>
-                        Start/Stop Camera
+                        Start Camera
                     </Button>
                     {shouldShow ?
                         (
@@ -401,21 +407,18 @@ function Home({navigation}) {
                         
                     </View>
                     
-
-                    {speechButton === "Stop Text to Speech" && (
-                        <View style={styles.textInputStyle}>
-                            <TextInput
-                                value={speechResult}
-                                multiline={true}
-                                placeholder= "say something!"
-                                style={{
-                                    flex: 1,
-                                    height: 50,
-                                }}
-                                onChangeText={text => setSpeechResult(text)}
-                            />
-                        </View>
-                    )}
+                    <View style={styles.textInputStyle}>
+                        <TextInput
+                            value={speechResult}
+                            multiline={true}
+                            placeholder= "say something!"
+                            style={{
+                                flex: 1,
+                                height: 50,
+                            }}
+                            onChangeText={text => setSpeechResult(text)}
+                        />
+                    </View>
 
                     <FlatList style={styles.messages}
                         data={messages}
@@ -520,7 +523,6 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         width: '50%',
         marginTop: '5%',
-        marginBottom: 20,
     },
     button_text:{
         marginBottom: 2,
@@ -612,18 +614,11 @@ const styles = StyleSheet.create({
     Icontainer: {
         padding: 20,
       },
-    Ilogo: {
-    alignSelf: 'center',
-    width: '100%',
-    height: '100%',
-    },
-    webView: {
-        flex: 1,
+      Ilogo: {
         alignSelf: 'center',
-        width: '90%',
-        height: '90%',
-        // padding:200
-    },
+        width: '100%',
+        height: '100%',
+      },
 
 })
 
