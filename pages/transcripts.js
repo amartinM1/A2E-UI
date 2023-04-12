@@ -1,7 +1,7 @@
 import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
-import useCollapse from 'react-collapsed';
-import './components/app.css';
+import Collapsible from 'react-native-collapsible';
+//import '../components/app.css';
 import {useSelector, useDispatch} from 'react-redux';
 import {
     Text,
@@ -12,6 +12,7 @@ import {
     ScrollView,
     FlatList,
 } from 'react-native';
+import { setTranscript } from '../redux/action';
 
 // Button Object
 function Button({onPress, children, toStyle, textStyle}) {
@@ -22,161 +23,66 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
-function Collapsible() {
+/*function Collapsible() {
     const { getCollapseProps, getToggleProps, isExpanded } = useCollapse();
-return (
-    <div className="collapsible">
-        <div className="header" {...getToggleProps()}>
-            {isExpanded ? 'Collapse' : 'Expand'}
-        </div>
-        <div {...getCollapseProps()}>
-            <div className="content">
-                Transcript <br/><br/>
-                Click again to hide...
+    return (
+        <React.Fragment>
+            <div style={Styles.header} {...getToggleProps()}>
+                {isExpanded ? 'Collapse' : 'Expand'}
             </div>
-        </div>
-    </div>
+            <div {...getCollapseProps()}>
+                <div style={Styles.content}>
+                    Transcript <br/><br/>
+                    Click again to hide...
+                </div>
+            </div>
+            <Collapsible collapsed={isCollapsed}>
+                <SomeCollapsedView />
+            </Collapsible>
+        </React.Fragment>
     );
-}
+}*/
 
-async function getTime() {
-    var hours = await new Date().getHours(); //Current Hours
-    var min = await new Date().getMinutes(); //Current Minutes
-    var sec = await new Date().getSeconds(); //Current Seconds
-    hours += '';
-    min += '';
-    sec += '';
-    if(hours.length == 1) {
-        hours = '0' + hours;
-    }
-    if(min.length == 1) {
-        min = '0' + min;
-    }
-    if(sec.length == 1) {
-        sec = '0' + sec;
-    }
-    var date = (hours + ':' + min + ':' + sec);
-    console.log('current time: ' + date);
-    return date;
+async function toggleCollapsed({isCollapsed, setCollapsed}) {
+    console.log("collopased");
+    setCollapsed(!isCollapsed);
+    return;
 }
 
 async function GetMessages({store}) {
     var messages = [];
     
     await database()
-    .ref(`/users/${store.name}/transcripts/${store.transcript}/messages`)
+    .ref(`/users/${store.name}/transcripts`)
         .once("value") 
         .then((snapshot) => {
             snapshot.forEach((child) => {
                 var message = {};
-                message['time'] = child.key;
-                message['msg'] = child.val()['msg'];
-                message['usr'] = child.val()['usr'];
+                message['msg'] = child.key;
                 messages.push(message);
 
             })
         });
-   // console.log(messages);
+    console.log(messages);
     return messages;
 }
 
-async function EditMessage({message, store}) {
-    await database()
-        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
-        .update({
-            ['msg'] : message.msg,
-            ['usr'] : message.usr,
-        })
-        .then(() => console.log(`updated message at: ${message.time}`));
-    return;
-}
-
-async function DeleteMessage({message, store}) {
-    await database()
-        .ref(`/users/${store.name}/transcripts/${store.transcript}/messages/${message.time}`)
-        .remove()
-        .then(() => console.log(`deleted message at: ${message.time}`));
-    return;
-}
-
-async function ReceiveData({data, usr, reload}) {
-    var message = {msg: "", time: "", usr: ""};
-    message.usr = usr;
-    message.msg = data;
-    message.time = await getTime();
-    EditMessage(message);
-    reload();
-}
-
-function TextBox({message, reload, store}) {
-    const[canEdit, setEdit] = useState(false);
-    const[color, setColor] = useState('black');
-    useEffect(() => {
-        if(message.time == '+' && !canEdit) {
-            setColor('#04a4f4');
-        }
-    });
-    async function toggle() {
-        if(!canEdit) {
-            if(message.time == '+') {
-                setColor('#98dcfd');
-            }
-            else {
-                setColor('gray');
-            }
-        }
-        else {
-            if(message.time == '+') {
-                if(message.msg != "add message") {
-                    setColor('black');
-                    message.time = await getTime();
-                    if(message.msg.length == 0) {
-                        DeleteMessage({message, store});
-                    }
-                    else {
-                        EditMessage({message, store});
-                    }
-                }
-                else {
-                    setColor('#04a4f4');
-                }
-            }
-            else {
-                setColor('black');
-                if(message.msg.length == 0) {
-                    DeleteMessage({message, store});
-                }
-                else {
-                    EditMessage({message, store});
-                }
-            }
-        }
-        setEdit(!canEdit);
-        reload();
-    }
-    function saveChange(value) {
-        message.msg = value;
+function TextBox({message, reload, store, dispatch}) {
+    function select(value) {
+        console.log(value);
+        dispatch(setTranscript(value));
     }
     return (
         <View style={styles.textbox}>
             <Button 
                 style={styles.time}
-                onPress={() => toggle()} 
-                toStyle={styles.edit_text}
+                onPress={() => select(message.msg)} 
                 textStyle={styles.highlight}
-                setEditable={canEdit}
-            >
-                {message.time}
-            </Button>
-            <TextInput 
-                style={styles.text} 
-                color={color} 
-                editable={canEdit} 
+                setEditable={false}
                 multiline={true}
-                onChangeText={(value) => saveChange(value)}
-            > 
+            >
                 {message.msg}
-            </TextInput>
+            </Button>
         </View>
     );
 };
@@ -184,9 +90,10 @@ function TextBox({message, reload, store}) {
 let itemsRef = database().ref('/items');
 
 function Transcripts({navigation}) {
-    const [messages, setMessages] = useState([{msg: "Loading...", time: "", usr: ""}]);
+    const [messages, setMessages] = useState([{msg: "Loading..."}]);
     const store = useSelector(state => state.userReducer); 
     const dispatch = useDispatch();
+    const [isCollapsed, setCollapsed] = useState(true);
 
     const fetchData = async () => {
         const data = await GetMessages({store});
@@ -204,6 +111,7 @@ function Transcripts({navigation}) {
             message={item} 
             reload={() => fetchData()}
             store={store}
+            dispatch={dispatch}
         />
     );
         
@@ -213,14 +121,12 @@ function Transcripts({navigation}) {
                 <Text style={styles.logo}>A2E</Text>
             </View>
             <View style={styles.main_container}>
-            <Collapsible/>
-             <FlatList style={styles.right_screen}
+                <FlatList style={styles.right_screen}
                     data={messages}
                     renderItem={renderItem}
                     keyExtractor={item => item.time}
                     removeClippedSubviews={false}
                 />
-                <View style={styles.break}/>
             </View>   
         </View>
     );
@@ -274,11 +180,6 @@ const styles = StyleSheet.create({
         borderRadius: 15, 
         borderColor: '#04a4f4',
     },
-    highlight: {
-        fontSize: 22,
-        fontWeight: '700',
-        textAlign: 'center',
-    },
     loginText: {
         fontSize: 22,
         color: '#fff', 
@@ -326,6 +227,14 @@ const styles = StyleSheet.create({
         width: '27.5%',
         paddingLeft: '2.5%',
         paddingRight: '2.5%',
+    },
+    content: {
+        width: "100%",
+        backgroundColor: "#eeeeee",
+        alignContent: 'flex-start',
+        alignItems: 'flex-start',
+        alignSelf: 'flex-start',
+        justifyContent: 'flex-start',
     },
 });
 

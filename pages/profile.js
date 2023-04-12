@@ -1,7 +1,5 @@
 import React, {Component,useEffect, useState} from 'react';
 import database from '@react-native-firebase/database';
-import { MyProvider } from '../components/myContext.js';
-import MyComponent from '../components/myComponent.js';
 import {useSelector, useDispatch} from 'react-redux';
 import {setUser, setTranscript} from '../redux/action';
 import{

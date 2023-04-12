@@ -6,6 +6,7 @@ import events from "events"
 import Voice from '@react-native-voice/voice';
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
 import {useSelector, useDispatch} from 'react-redux';
+import { useIsFocused } from '@react-navigation/native'
 import {
     Text,
     TextInput,
@@ -215,6 +216,7 @@ function Home({navigation}) {
     const [speechButton, setSpeechButton] = useState('Start Speech to Text');
     const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
     const socket = 1;
+    const isFocused = useIsFocused()
 
     const store = useSelector(state => state.userReducer); 
 
@@ -226,7 +228,7 @@ function Home({navigation}) {
         console.log('Server closed connection');
     });
 
-    console.log("home was ran")
+    console.log("home was ran");
 
 
     udp_socket.on('error', (error) => {
@@ -255,7 +257,7 @@ function Home({navigation}) {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [isFocused]);
 
     useEffect(() => {
         if(!tcp_connected) {
