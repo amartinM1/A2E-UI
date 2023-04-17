@@ -5,7 +5,7 @@ import dgram from 'react-native-udp';
 import events from "events"
 import Voice from '@react-native-voice/voice';
 import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
-import {useSelector, useDispatch} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useIsFocused } from '@react-navigation/native'
 import {
     Text,
@@ -117,18 +117,19 @@ async function DeleteMessage({message, store}) {
     return;
 }
 
-async function ReceiveData({data, usr, reload}) {
+async function ReceiveData(data, usr, reload, {store}) {
+    console.log("store name pt 2 " + store.name);
     var message = {msg: "", time: "", usr: ""};
     message.usr = usr;
     message.msg = data;
     message.time = await getTime();
-    EditMessage(message);
+    EditMessage({message, store});
     reload();
 }
 
 function TextBox({message, reload, store}) {
-    const[canEdit, setEdit] = useState(false);
-    const[color, setColor] = useState('black');
+    const [canEdit, setEdit] = useState(false);
+    const [color, setColor] = useState('black');
     useEffect(() => {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
@@ -228,7 +229,7 @@ function Home({navigation}) {
         console.log('Server closed connection');
     });
 
-    console.log("home was ran");
+    //console.log("home was ran");
 
 
     udp_socket.on('error', (error) => {
@@ -267,7 +268,7 @@ function Home({navigation}) {
                     // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    ReceiveData(data, "asl", fetchData, {store});
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -296,7 +297,9 @@ function Home({navigation}) {
     
     const speechResultsHandler = e => {
         const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
+        console.log("speech text output: " + text);
+        console.log("the store name is: " + store.name);
+        ReceiveData(text, "voice", fetchData, {store});
         setSpeechResult(text);
     };
     
