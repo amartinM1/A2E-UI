@@ -215,6 +215,7 @@ function Home({navigation}) {
     const [loadingSpeech, setLoadingSpeech] = useState(false);
     const [speechButton, setSpeechButton] = useState('Start Speech to Text');
     const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
+    const [currentTime, setTime] = useState("");
     const socket = 1;
     const isFocused = useIsFocused()
 
@@ -265,9 +266,9 @@ function Home({navigation}) {
                 tcp_socket.on('data', (data) => {
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    // if (predictionsButton == 'Stop Predictions') {
-                    ReceiveData(String(data), "asl", fetchData, {store});
-                    // }
+                    if (predictionsButton == 'Stop Predictions') {
+                        ReceiveData(String(data), "asl", fetchData, {store});
+                    }
                 });
                     
                 tcp_socket.on('error', (error) => {
