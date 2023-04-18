@@ -1,11 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\app\\src",
-    "\\app\\src\\main",
     "\\pages",
-    "\\pages\\nlp_dependencies"
+    "\\pages\\nlp_dependencies",
+    "\\redux"
   ],
-  "SelectedNode": "\\pages",
+  "SelectedNode": "\\pages\\home.js",
   "PreviewInSolutionExplorer": false
 }

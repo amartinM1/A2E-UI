@@ -257,11 +257,7 @@ function Home({navigation}) {
 
     const fetchData = async () => {
         const data = await GetMessages({ store });
-        let [answerText, curr_sen, temp, curr_letters] = appendSign(data, currSen, tempText, currLetters);  //NLP Processing
-        setCurrLetters(curr_letters);
-        setCurrSen(curr_sen);
-        setTempText(temp);
-        setMessages(answerText); //previously setMessages(data)
+        setMessages(data);
     };
 
     useEffect(() => {
@@ -275,7 +271,13 @@ function Home({navigation}) {
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
                     // if (predictionsButton == 'Stop Predictions') {
-                    ReceiveData(String(data), "asl", fetchData, {store});
+
+                    let [answerText, curr_sen, temp, curr_letters] = appendSign(String(data), currSen, tempText, currLetters);  //NLP Processing
+                    setCurrLetters(curr_letters);
+                    setCurrSen(curr_sen);
+                    setTempText(temp);
+
+                    ReceiveData(answerText, "asl", fetchData, {store});
                     // }
                 });
                     
@@ -316,9 +318,6 @@ function Home({navigation}) {
         setLoadingSpeech(true);
         try {
             await Voice.start('en-Us');
-            setCurrSen([]);         //Reset NLP vars
-            setTempText([]);
-            setCurrLetters("");
         }
         catch (error) {
             console.log('error', error);
@@ -345,6 +344,7 @@ function Home({navigation}) {
             setSpeechButton('Start Speech to Text');
         }
     };
+
 //use state for dynamically creating speech fiiedl when the speechresult is handled
     const [val, setVal] = useState([]); //this is esssentially the speechresult use state 
     const handleAdd =()=> {
@@ -364,6 +364,9 @@ function Home({navigation}) {
         }
         else if (predictionsButton == "Stop Predictions") {
             setPredictionsButton('Start Predictions');
+            setCurrSen([]);         //Reset NLP vars
+            setTempText([]);
+            setCurrLetters("");
         }
     };
 
