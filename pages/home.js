@@ -21,9 +21,11 @@ import {
     EventEmitter,
     LogBox
 } from 'react-native';
+import appendSign from "nlp";
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
+
 
 events.EventEmitter.defaultMaxListeners = 100
 
@@ -215,6 +217,9 @@ function Home({navigation}) {
     const [loadingSpeech, setLoadingSpeech] = useState(false);
     const [speechButton, setSpeechButton] = useState('Start Speech to Text');
     const [predictionsButton, setPredictionsButton] = useState('Start Predictions');
+    const [currSen, setCurrSen] = useState([]);             //Emily added these three
+    const [tempText, setTempText] = useState([]);
+    const [currLetters, setCurrLetters] = useState("");
     const socket = 1;
     const isFocused = useIsFocused()
 
@@ -251,8 +256,12 @@ function Home({navigation}) {
     // });
 
     const fetchData = async () => {
-        const data = await GetMessages({store});
-        setMessages(data);
+        const data = await GetMessages({ store });
+        let [answerText, curr_sen, temp, curr_letters] = appendSign(data, currSen, tempText, currLetters);  //NLP Processing
+        setCurrLetters(curr_letters);
+        setCurrSen(curr_sen);
+        setTempText(temp);
+        setMessages(answerText); //previously setMessages(data)
     };
 
     useEffect(() => {
@@ -307,6 +316,9 @@ function Home({navigation}) {
         setLoadingSpeech(true);
         try {
             await Voice.start('en-Us');
+            setCurrSen([]);         //Reset NLP vars
+            setTempText([]);
+            setCurrLetters("");
         }
         catch (error) {
             console.log('error', error);

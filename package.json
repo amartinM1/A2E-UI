@@ -21,6 +21,7 @@
     "expo": "^47.0.13",
     "expo-splash-screen": "~0.17.5",
     "expo-status-bar": "~1.4.2",
+    "pos": "*",
     "react": "18.1.0",
     "react-collapsed": "^4.0.2",
     "react-dom": "18.1.0",
