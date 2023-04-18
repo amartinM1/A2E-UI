@@ -4,8 +4,8 @@ import TcpSocket from 'react-native-tcp-socket';
 import dgram from 'react-native-udp';
 import events from "events"
 import Voice from '@react-native-voice/voice';
-import { VLCPlayer, VlCPlayerView } from 'react-native-vlc-media-player';
-import {useSelector, useDispatch} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { WebView } from 'react-native-webview';
 import { useIsFocused } from '@react-navigation/native'
 import {
     Text,
@@ -19,9 +19,13 @@ import {
     FlatList,
     Image,
     EventEmitter,
+    LogBox
 } from 'react-native';
-
 import appendSign from "nlp";
+
+LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
+
 
 events.EventEmitter.defaultMaxListeners = 100
 
@@ -34,7 +38,7 @@ function Button({onPress, children, toStyle, textStyle}) {
     ); 
 }
 
-function StartCamera({udp}) {
+function StartCamera() {
       return (
         <View style={{ 
             flex: 1,
@@ -42,12 +46,9 @@ function StartCamera({udp}) {
             alignItems: 'center',
             padding:25}}
         >
-            <VLCPlayer
-                source={{ uri: "http://10.136.58.3:5000/video_feed" }}
-                style={[styles.Ilogo]}
-                paused={false}
-                autoAspectRatio={true}
-                resizeMode={"fill"}
+            <WebView
+                source={{ uri: "http://10.136.176.29:5000/video_feed" }} // Set the URL you want to load
+                style={{ width:450, height:500 }}
             />
         </View>
       );
@@ -119,18 +120,19 @@ async function DeleteMessage({message, store}) {
     return;
 }
 
-async function ReceiveData({data, usr, reload}) {
+async function ReceiveData(data, usr, reload, {store}) {
+    console.log("store name pt 2 " + store.name);
     var message = {msg: "", time: "", usr: ""};
     message.usr = usr;
     message.msg = data;
     message.time = await getTime();
-    EditMessage(message);
+    EditMessage({message, store});
     reload();
 }
 
 function TextBox({message, reload, store}) {
-    const[canEdit, setEdit] = useState(false);
-    const[color, setColor] = useState('black');
+    const [canEdit, setEdit] = useState(false);
+    const [color, setColor] = useState('black');
     useEffect(() => {
         if(message.time == '+' && !canEdit) {
             setColor('#04a4f4');
@@ -209,9 +211,7 @@ function TextBox({message, reload, store}) {
 function Home({navigation}) {
     const [messages, setMessages] = useState([{msg: "Loading...", time: "", usr: ""}]);
     const [tcp_server, setTCPServer] = useState(TcpSocket.createServer());
-    const [udp_socket, setUDPSocket] = useState(dgram.createSocket({type: 'udp4', reusePort: true}));
     const [tcp_connected, setTCPConnected] = useState(false);
-    const [udp_connected, setUDPConnected] = useState(false);
     const [shouldShow, setShouldShow] = useState(false);
     const [speechResult, setSpeechResult] = useState('');
     const [loadingSpeech, setLoadingSpeech] = useState(false);
@@ -233,27 +233,27 @@ function Home({navigation}) {
         console.log('Server closed connection');
     });
 
-    console.log("home was ran");
+    //console.log("home was ran");
 
 
-    udp_socket.on('error', (error) => {
-        console.log('An error occured with the UDP Socket');
-    });
+    // udp_socket.on('error', (error) => {
+    //     console.log('An error occured with the UDP Socket');
+    // });
 
-    useEffect(() => {
-        if(!udp_connected) {
-            udp_socket.bind(6000, '10.136.140.5');
-            setUDPSocket(udp_socket);
-            setUDPConnected(true);
-        }
+    // useEffect(() => {
+    //     if(!udp_connected) {
+    //         udp_socket.bind(6000, '10.136.140.5');
+    //         setUDPSocket(udp_socket);
+    //         setUDPConnected(true);
+    //     }
 
-        udp_socket.once('listening', function() {
-            udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.255.136', function(err) {
-                if (err) throw err
-                console.log('Message sent!')
-            })
-        });
-    });
+    //     udp_socket.once('listening', function() {
+    //         udp_socket.send('Hello World!', 0, 65536, 3000, '10.136.255.136', function(err) {
+    //             if (err) throw err
+    //             console.log('Message sent!')
+    //         })
+    //     });
+    // });
 
     const fetchData = async () => {
         const data = await GetMessages({ store });
@@ -272,11 +272,11 @@ function Home({navigation}) {
         if(!tcp_connected) {
             const server = TcpSocket.createServer(function(tcp_socket) {
                 tcp_socket.on('data', (data) => {
-                    // if notspeaking
-                    // 
                     tcp_socket.write('Echo server ' + data);
                     console.log('receieved data ' + data);
-                    ReceiveData(String(data), "asl", fetchData);
+                    // if (predictionsButton == 'Stop Predictions') {
+                    ReceiveData(String(data), "asl", fetchData, {store});
+                    // }
                 });
                     
                 tcp_socket.on('error', (error) => {
@@ -285,8 +285,9 @@ function Home({navigation}) {
                     
                 tcp_socket.on('close', (error) => {
                     console.log('Closed connection with ', tcp_socket.address());
+
                 });
-            }).listen({ port: 4000, host: '10.136.140.5' , reuseAddress: true });
+            }).listen({ port: 4001, host: '10.136.218.237' , reuseAddress: true });
             console.log('Creating TCP Server');
             setTCPServer(server);
             setTCPConnected(true);
@@ -305,7 +306,9 @@ function Home({navigation}) {
     
     const speechResultsHandler = e => {
         const text = e.value[0];
-        ReceiveData(String(text), "voice", fetchData);
+        console.log("speech text output: " + text);
+        console.log("the store name is: " + store.name);
+        ReceiveData(text, "voice", fetchData, {store});
         setSpeechResult(text);
     };
     
@@ -419,9 +422,7 @@ function Home({navigation}) {
                     </Button>
                     {shouldShow ?
                         (
-                            <StartCamera
-                                udp={udp_socket}
-                            />
+                            <StartCamera/>
                         ) : null}
                 </View>
                 <View style={styles.verticle_line}></View>
